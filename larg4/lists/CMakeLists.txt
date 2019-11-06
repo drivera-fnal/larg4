@@ -1,6 +1,15 @@
 include_directories($ENV{GEANT4_FQ_DIR}/include)
 include_directories($ENV{XERCES_C_INC})
 
+#include_directories(./include)
+#include_directories(models)
+#include_directories(builders)
+#include_directories(processes)
+
+#set(ENV{G4CASCADE_DEBUG_INTERFACE} 1)
+add_definitions( -DG4CASCADE_DEBUG_INTERFACE=1 )
+add_definitions( -DMYG4CASCADE_DEBUG_INTERFACE=1 )
+
 art_make(
   LIB_LIBRARIES
     nug4_G4Base
@@ -33,11 +42,6 @@ art_make(
     ${ART_FRAMEWORK_CORE}
     ${MF_MESSAGELOGGER}
 )
-
-#art_make_library( 
-#  LARG4_LISTS larg4_lists
-#  SOURCE MyQGSP_BERT_HP.cc
-#  )
 
 install_headers()
 install_source()

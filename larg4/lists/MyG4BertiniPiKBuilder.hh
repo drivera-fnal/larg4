@@ -23,52 +23,60 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-// $Id: MyQGSP_BERT_HP.hh 66892 2019-10-10 10:57:59Z drivera $
+// $Id: MyG4BertiniPiKBuilder.hh 66892 2013-01-17 10:57:59Z gunter $
 //
 //---------------------------------------------------------------------------
 //
-// ClassName:   MyQGSP_BERT_HP
+// ClassName:   MyG4BertiniPiKBuilder
 //
-// Author: 2002 J.P. Wellisch
+// Author: 2002 H.P. Wellisch
 //
-// Modified: 2019 D. Rivera
+// Modified:
+// 30.03.2009 V.Ivanchenko create cross section by new
 //
 //----------------------------------------------------------------------------
 //
-#ifndef TMyQGSP_BERT_HP_h
-#define TMyQGSP_BERT_HP_h 1
-
-#include <CLHEP/Units/SystemOfUnits.h>
+#ifndef MyG4BertiniPiKBuilder_h
+#define MyG4BertiniPiKBuilder_h 1
 
 #include "Geant4/globals.hh"
-#include "Geant4/G4VModularPhysicsList.hh"
-#include "Geant4/CompileTimeConstraints.hh"
 
-//#ifndef G4CASCADE_DEBUG_INTERFACE
-//#define G4CASCADE_DEBUG_INTERFACE 1
-//#endif
+#include "Geant4/G4HadronElasticProcess.hh"
+#include "Geant4/G4HadronFissionProcess.hh"
+#include "Geant4/G4HadronCaptureProcess.hh"
+#include "Geant4/G4NeutronInelasticProcess.hh"
+#include "Geant4/G4VPiKBuilder.hh"
 
-template<class T>
-class TMyQGSP_BERT_HP: public T
+#include "Geant4/G4PiNuclearCrossSection.hh"
+#include "MyG4CascadeInterface.hh"   
+
+class MyG4BertiniPiKBuilder : public G4VPiKBuilder
 {
-public:
-  TMyQGSP_BERT_HP(G4int ver=1);
-  virtual ~TMyQGSP_BERT_HP();
-  
-public:
-  // SetCuts() 
-  virtual void SetCuts();
+  public: 
+    MyG4BertiniPiKBuilder();
+    virtual ~MyG4BertiniPiKBuilder();
 
-private:
-  enum {ok = CompileTimeConstraints::IsA<T, G4VModularPhysicsList>::ok };
+  public: 
+    virtual void Build(G4HadronElasticProcess * aP);
+    virtual void Build(G4PionPlusInelasticProcess * aP);
+    virtual void Build(G4PionMinusInelasticProcess * aP);
+    virtual void Build(G4KaonPlusInelasticProcess * aP);
+    virtual void Build(G4KaonMinusInelasticProcess * aP);
+    virtual void Build(G4KaonZeroLInelasticProcess * aP);
+    virtual void Build(G4KaonZeroSInelasticProcess * aP);
+    
+    void SetMinEnergy(G4double aM) {theMin = aM;}
+    void SetMaxEnergy(G4double aM) {theMax = aM;}
+
+  private:
+    G4PiNuclearCrossSection* thePiData;
+    MyG4CascadeInterface * theModel;    
+    G4double theMin;
+    G4double theMax;
+
 };
-
-#include "larg4/larg4/lists/MyQGSP_BERT_HP.icc"
-typedef TMyQGSP_BERT_HP<G4VModularPhysicsList> MyQGSP_BERT_HP;
 
 // 2019 by D. Rivera
 
 #endif
-
-
 

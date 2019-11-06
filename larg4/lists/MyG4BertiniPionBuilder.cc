@@ -23,48 +23,59 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-// $Id: MyQGSP_BERT_HP.hh 66892 2019-10-10 10:57:59Z drivera $
+// $Id: MyG4BertiniPionBuilder.cc 83699 2014-09-10 07:18:25Z gcosmo $
 //
 //---------------------------------------------------------------------------
 //
-// ClassName:   MyQGSP_BERT_HP
+// ClassName:   MyG4BertiniPionBuilder
 //
-// Author: 2002 J.P. Wellisch
+// Author: 2010 G.Folger
+//  devired from G4BertiniPiKBuilder
 //
-// Modified: 2019 D. Rivera
+// Modified:
+// 02.04.2009 V.Ivanchenko remove add cross section, string builderis reponsible 
 //
 //----------------------------------------------------------------------------
 //
-#ifndef TMyQGSP_BERT_HP_h
-#define TMyQGSP_BERT_HP_h 1
+#include "MyG4BertiniPionBuilder.hh"
+#include "Geant4/G4SystemOfUnits.hh"
+#include "Geant4/G4ParticleDefinition.hh"
+#include "Geant4/G4ParticleTable.hh"
+#include "Geant4/G4ProcessManager.hh"
+#include "Geant4/G4CrossSectionDataSetRegistry.hh"
 
-#include <CLHEP/Units/SystemOfUnits.h>
+MyG4BertiniPionBuilder::
+MyG4BertiniPionBuilder() 
+ {
+   thePiData = (G4PiNuclearCrossSection*)G4CrossSectionDataSetRegistry::Instance()->GetCrossSectionDataSet(G4PiNuclearCrossSection::Default_Name());
+   theMin = 0*GeV;
+   theMax = 9.9*GeV;
+   theModel = new MyG4CascadeInterface;
+   theModel->SetMinEnergy(theMin);
+   theModel->SetMaxEnergy(theMax); 
+ }
 
-#include "Geant4/globals.hh"
-#include "Geant4/G4VModularPhysicsList.hh"
-#include "Geant4/CompileTimeConstraints.hh"
-
-template<class T>
-class TMyQGSP_BERT_HP: public T
+MyG4BertiniPionBuilder::~MyG4BertiniPionBuilder() 
 {
-public:
-  TMyQGSP_BERT_HP(G4int ver=1);
-  virtual ~TMyQGSP_BERT_HP();
-  
-public:
-  // SetCuts() 
-  virtual void SetCuts();
+}
 
-private:
-  enum {ok = CompileTimeConstraints::IsA<T, G4VModularPhysicsList>::ok };
-};
+void MyG4BertiniPionBuilder::
+Build(G4PionPlusInelasticProcess * aP)
+ {
+   aP->RegisterMe(theModel);
+   theModel->SetMinEnergy(theMin);
+   theModel->SetMaxEnergy(theMax);
+ }
 
-#include "larg4/larg4/lists/include/MyQGSP_BERT_HP.icc"
-typedef TMyQGSP_BERT_HP<G4VModularPhysicsList> MyQGSP_BERT_HP;
+void MyG4BertiniPionBuilder::
+Build(G4PionMinusInelasticProcess * aP)
+ {
+   aP->RegisterMe(theModel);
+   theModel->SetMinEnergy(theMin);
+   theModel->SetMaxEnergy(theMax);
+ }
 
-// 2019 by D. Rivera
+void MyG4BertiniPionBuilder::
+Build(G4HadronElasticProcess * ) {}
 
-#endif
-
-
-
+         

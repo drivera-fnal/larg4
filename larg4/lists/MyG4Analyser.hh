@@ -23,52 +23,61 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-// $Id: MyQGSP_BERT_HP.hh 66892 2019-10-10 10:57:59Z drivera $
+// $Id: MyG4Analyser.hh 66241 2012-12-13 18:34:42Z gunter $
 //
-//---------------------------------------------------------------------------
-//
-// ClassName:   MyQGSP_BERT_HP
-//
-// Author: 2002 J.P. Wellisch
-//
-// Modified: 2019 D. Rivera
-//
-//----------------------------------------------------------------------------
-//
-#ifndef TMyQGSP_BERT_HP_h
-#define TMyQGSP_BERT_HP_h 1
+// 20101010  M. Kelsey -- Migrate to integer A and Z
 
-#include <CLHEP/Units/SystemOfUnits.h>
+#ifndef MYG4ANALYSER_HH
+#define MYG4ANALYSER_HH
 
-#include "Geant4/globals.hh"
-#include "Geant4/G4VModularPhysicsList.hh"
-#include "Geant4/CompileTimeConstraints.hh"
+#define WITH_NUCLEI
 
-//#ifndef G4CASCADE_DEBUG_INTERFACE
-//#define G4CASCADE_DEBUG_INTERFACE 1
-//#endif
+#include "Geant4/G4CollisionOutput.hh"
+//#include "G4InuclParticle.hh"
+#include "Geant4/G4InuclElementaryParticle.hh"
+#include "Geant4/G4InuclNuclei.hh"
+#include "Geant4/G4NuclWatcher.hh"
+//#include "G4ExitonConfiguration.hh"
 
-template<class T>
-class TMyQGSP_BERT_HP: public T
-{
+#include <vector>
+
+class MyG4Analyser {
+
 public:
-  TMyQGSP_BERT_HP(G4int ver=1);
-  virtual ~TMyQGSP_BERT_HP();
-  
-public:
-  // SetCuts() 
-  virtual void SetCuts();
 
-private:
-  enum {ok = CompileTimeConstraints::IsA<T, G4VModularPhysicsList>::ok };
-};
+  MyG4Analyser();
+  void setInelCsec(G4double csec, G4bool withn);
+  void setWatchers(const std::vector<G4NuclWatcher>& watchers);
+  void try_watchers(G4int a, G4int z, G4bool if_nucl);
+  void analyse(const G4CollisionOutput& output);
+  void printResults();
+  void printResultsSimple();
+  void handleWatcherStatistics();
+  void printResultsNtuple();
 
-#include "larg4/larg4/lists/MyQGSP_BERT_HP.icc"
-typedef TMyQGSP_BERT_HP<G4VModularPhysicsList> MyQGSP_BERT_HP;
+private: 
 
-// 2019 by D. Rivera
+  G4int verboseLevel;
+  G4double eventNumber;
+  G4double averageMultiplicity;
+  G4double averageProtonNumber;
+  G4double averageNeutronNumber;
+  G4double averagePionNumber;
+  G4double averageNucleonKinEnergy;
+  G4double averageProtonKinEnergy;
+  G4double averageNeutronKinEnergy;
+  G4double averagePionKinEnergy;
+  G4double averageExitationEnergy;
+  G4double averageOutgoingNuclei;
+  G4double fissy_prob;
+  G4double averagePionPl;
+  G4double averagePionMin;
+  G4double averagePion0;
+  G4double averageA;
+  G4double averageZ;
+  std::vector<G4NuclWatcher> ana_watchers;
+  G4double inel_csec;
+  G4bool withNuclei;
+};        
 
-#endif
-
-
-
+#endif // MYG4ANALYSER_HH

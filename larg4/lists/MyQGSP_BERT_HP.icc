@@ -65,8 +65,13 @@
 #include "Geant4/G4StoppingPhysics.hh"
 #include "Geant4/G4HadronElasticPhysicsHP.hh"
 
+///#define G4CASCADE_DEBUG_INTERFACE 1
+
 #include "Geant4/G4DataQuestionaire.hh"
-#include "Geant4/G4HadronPhysicsQGSP_BERT_HP.hh"
+//#include "include/G4HadronPhysicsQGSP_BERT_HP.hh"
+#include "MyG4HadronPhysicsQGSP_BERT_HP.hh"
+///#include "larg4/larg4/lists/include/MyG4HadronPhysicsQGSP_BERT_HP.hh"
+////#include "larg4/larg4/lists/MyG4HadronPhysicsQGSP_BERT_HP.hh"
 
 template<class T> TMyQGSP_BERT_HP<T>::TMyQGSP_BERT_HP(G4int ver):  T()
 {
@@ -91,7 +96,8 @@ template<class T> TMyQGSP_BERT_HP<T>::TMyQGSP_BERT_HP(G4int ver):  T()
   this-> RegisterPhysics( new G4HadronElasticPhysicsHP(ver) );
 
   // Hadron Physics
-  this->RegisterPhysics( new G4HadronPhysicsQGSP_BERT_HP(ver));
+  //<--this->RegisterPhysics( new G4HadronPhysicsQGSP_BERT_HP(ver));
+  this->RegisterPhysics( new MyG4HadronPhysicsQGSP_BERT_HP(ver));
 
   // Stopping Physics
   this->RegisterPhysics( new G4StoppingPhysics(ver));
@@ -108,7 +114,7 @@ template<class T> TMyQGSP_BERT_HP<T>::~TMyQGSP_BERT_HP()
 template<class T> void TMyQGSP_BERT_HP<T>::SetCuts()
 {
   if (this->verboseLevel >1){
-    G4cout << "MyQGSP_BERT_HP::SetCuts:";
+    G4cout << "MyQGSP_BERT_HP::SetCuts: \n";
   }  
   //  " G4VUserPhysicsList::SetCutsWithDefault" method sets 
   //   the default cut value for all particle types 

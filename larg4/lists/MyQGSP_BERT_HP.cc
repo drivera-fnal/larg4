@@ -6,7 +6,7 @@
 //non-extensible:  #include "G4PhysListFactory.hh"                                                  
 #include "Geant4/G4PhysListFactoryAlt.hh"                                                                  
 //use this for drop-in replacement:  using namespace g4alt;                                         
-using namespace g4alt;
+//using namespace g4alt;
                                                                                                     
 /////////////////////////////////////////////////////////////////////////////                       
 // headers needed to demonstrate new featues                                                        
@@ -28,5 +28,7 @@ using namespace g4alt;
 
 #include "Geant4/G4PhysListStamper.hh"  // defines macro for factory registration
 #include "MyQGSP_BERT_HP.hh"
+
+///#define G4CASCADE_DEBUG_INTERFACE 1
 
 G4_DECLARE_PHYSLIST_FACTORY(MyQGSP_BERT_HP);
