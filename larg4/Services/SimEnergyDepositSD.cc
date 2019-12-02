@@ -85,6 +85,7 @@ namespace larg4 {
 				       aStep->GetPostStepPoint()->GetPosition().z()/CLHEP::cm);
        sim::SimEnergyDeposit  newHit =  sim::SimEnergyDeposit(photons,
 							      nrelec,
+							      1.0,
 							      edep,
 							      start,
 							      end,
