@@ -9,6 +9,7 @@
 #include "nug4/G4Base/PrimaryParticleInformation.h"
 #include "lardataobj/Simulation/sim.h"
 #include "nug4/ParticleNavigation/ParticleList.h"
+#include "lardataobj/Simulation/GeneratedParticleInfo.h"
 
 // Framework includes
 #include "art/Framework/Principal/Event.h"
@@ -16,6 +17,8 @@
 #include "art/Framework/Core/ProducingService.h"
 // framework includes:
 #include "art/Framework/Services/Registry/ServiceMacros.h"
+#include "canvas/Utilities/Exception.h"
+#include "cetlib_except/exception.h"
 #include "canvas/Persistency/Common/Ptr.h"
 #include "Geant4/G4Event.hh"
 #include "Geant4/G4Track.hh"
@@ -74,6 +77,7 @@ namespace larg4 {
     // of the Geant4 simulation.
     fparticleList = new sim::ParticleList;
     fParentIDMap.clear();
+    fMCTIndexMap.clear();
   }
 
   art::Event  *ParticleListActionService::getCurrArtEvent() { return (currentArtEvent_); }
@@ -93,6 +97,7 @@ namespace larg4 {
     fCurrentParticle.clear();
     fparticleList->clear();
     fParentIDMap.clear();
+    fMCTIndexMap.clear();
     fCurrentTrackID = sim::NoParticleId;
    }
 
@@ -147,10 +152,15 @@ namespace larg4 {
     // have to go up a "chain" of information to find out:
     const G4DynamicParticle* dynamicParticle = track->GetDynamicParticle();
     const G4PrimaryParticle* primaryParticle = dynamicParticle->GetPrimaryParticle();
+    simb::GeneratedParticleIndex_t primaryIndex = simb::NoGeneratedParticleIndex;
+    size_t primarymctIndex = 0;
     if ( primaryParticle != 0 ){
       const G4VUserPrimaryParticleInformation* gppi = primaryParticle->GetUserInformation();
       const g4b::PrimaryParticleInformation* ppi = dynamic_cast<const g4b::PrimaryParticleInformation*>(gppi);
       if ( ppi != 0 ){
+        primaryIndex = ppi->MCParticleIndex();
+        primarymctIndex = ppi->MCTruthIndex();
+        mf::LogDebug("PrimaryMCTIndex") << "Primary MCTIndex = " << primarymctIndex;
         // If we've made it this far, a PrimaryParticleInformation
         // object exists and we are using a primary particle, set the
         // process name accordingly
@@ -191,8 +201,8 @@ namespace larg4 {
 
         // check that fCurrentTrackID is in the particle list - it is possible
         // that this particle's parent is a particle that did not get tracked.
-        // An example is a partent that was made due to muMinusCaptureAtRest
-        // and the daughter was made by the phot process.  The parent likely
+        // An example is a parent that was made due to muMinusCaptureAtRest
+        // and the daughter was made by the phot process. The parent likely
         // isn't saved in the particle list because it is below the energy cut
         // which will put a bogus track id value into the sim::IDE object for
         // the sim::SimChannel if we don't check it.
@@ -245,6 +255,12 @@ namespace larg4 {
           parentID = pid;
       }
 
+      // Once the parentID is secured, inherit the MCTruth Index
+      // which should have been set already
+      primarymctIndex = fMCTIndexMap[parentID];
+      // MF_LOG_INFO("SecondaryMCTIndex") << "(trackID, parentID, MCTIndex) = " << trackID
+      //                                  << ", " << parentID << ", " << primarymctIndex;
+
     }// end if not a primary particle
 
       // This is probably the PDG mass, but just in case:
@@ -252,11 +268,17 @@ namespace larg4 {
 
       // Create the sim::Particle object.
     fCurrentParticle.clear();
-    fCurrentParticle.particle    = new simb::MCParticle( trackID, pdgCode, process_name, parentID, mass);
-      // if we are not filtering, we have a decision already
+    fCurrentParticle.particle   = new simb::MCParticle( trackID, pdgCode, process_name, parentID, mass);
+    fCurrentParticle.truthIndex = primaryIndex;
+
+    fMCTIndexMap[trackID] = primarymctIndex; 
+    mf::LogDebug("MCTIndex") << "(trackID, parentID, MCTIndex) = " << trackID
+                                       << ", " << parentID << ", " << primarymctIndex;
+
+    // if we are not filtering, we have a decision already
     if (!fFilter) fCurrentParticle.keep = true;
 
-      // Polarization.
+    // Polarization.
     const G4ThreeVector& polarization = track->GetPolarization();
     fCurrentParticle.particle->SetPolarization( TVector3( polarization.x(),
                                                          polarization.y(),
@@ -285,6 +307,13 @@ namespace larg4 {
       G4String process = aTrack->GetStep()->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName();
       fCurrentParticle.particle->SetEndProcess(process);
     }
+
+    // store truth record pointer, only if it is available
+    if (fCurrentParticle.isPrimary()) {
+      fPrimaryTruthMap[fCurrentParticle.particle->TrackId()]
+        = fCurrentParticle.truthInfoIndex();
+    }
+
     return;
   }
 
@@ -449,10 +478,24 @@ namespace larg4 {
       if( (*pn).first > highestID ) highestID = (*pn).first;
 
     //Only change the fTrackIDOffset if there is in fact a particle to add to the event
-    if( (fparticleList->size())!=0){ fTrackIDOffset = highestID + 1; }
+    if( (fparticleList->size())!=0){
+      fTrackIDOffset = highestID + 1; 
+      mf::LogDebug("GetList:fTrackIDOffset") << "highestID = " << highestID
+                                     << "\nfTrackIDOffset= " << fTrackIDOffset;
+    }
 
     return fparticleList;
   }
+  //----------------------------------------------------------------------------
+
+  simb::GeneratedParticleIndex_t ParticleListActionService::GetPrimaryTruthIndex
+    (int trackId) const
+  {
+    auto const iInfo = GetPrimaryTruthMap().find(trackId);
+    return (iInfo == GetPrimaryTruthMap().end())
+      ? simb::NoGeneratedParticleIndex: iInfo->second;
+  } // ParticleListAction::GetPrimaryTruthIndex()
+
 
   //----------------------------------------------------------------------------
   // Yields the ParticleList accumulated during the current event.
@@ -466,7 +509,11 @@ namespace larg4 {
       if( (*pn).first > highestID ) highestID = (*pn).first;
 
     //Only change the fTrackIDOffset if there is in fact a particle to add to the event
-    if( (fparticleList->size())!=0 ){ fTrackIDOffset = highestID + 1; }
+    if( (fparticleList->size())!=0 ){
+      fTrackIDOffset = highestID + 1; 
+      mf::LogDebug("YieldList:fTrackIDOffset") << "highestID = " << highestID
+                                     << "\nfTrackIDOffset= " << fTrackIDOffset;
+    }
 
     return std::move(*fparticleList);
   } // ParticleList&& ParticleListActionService::YieldList()
@@ -491,7 +538,8 @@ namespace larg4 {
   void ParticleListActionService::endOfEventAction(const G4Event*)
 {
   partCol_ = std::make_unique<std::vector<simb::MCParticle > >();
-  tpassn_ = std::make_unique<art::Assns<simb::MCTruth, simb::MCParticle >>();
+  //tpassn_ = std::make_unique<art::Assns<simb::MCTruth, simb::MCParticle >>();
+  tpassn_ = std::make_unique<art::Assns<simb::MCTruth, simb::MCParticle, sim::GeneratedParticleInfo >>();
   // Set up the utility class for the "for_each" algorithm.  (We only
   // need a separate set-up for the utility class because we need to
   // give it the pointer to the particle list.  We're using the STL
@@ -503,31 +551,64 @@ namespace larg4 {
   std::for_each(fparticleList->begin(),
                 fparticleList->end(),
                 updateDaughterInformation);
+
   art::ServiceHandle<ActionHolderService> ahs;
-  sim::ParticleList particleList = YieldList();
   art::Event * evt= getCurrArtEvent();
   std::vector< art::Handle< std::vector<simb::MCTruth> > > mclists;
   evt->getManyByType(mclists);
 
   MF_LOG_INFO("endOfEventAction") << "MCTruth Handles Size: " << mclists.size();
+
+  unsigned int nGeneratedParticles = 0;
+  sim::ParticleList particleList = YieldList();
   for(size_t mcl = 0; mcl < mclists.size(); ++mcl){
     art::Handle< std::vector<simb::MCTruth> > mclistHandle = mclists[mcl];
+    MF_LOG_INFO("endOfEventAction") << "mclistHandle Size: " << mclistHandle->size();
     for(size_t m = 0; m < mclistHandle->size(); ++m){
       art::Ptr<simb::MCTruth> mct(mclistHandle, m);
-      unsigned int nGeneratedParticles = 0;
-      for (auto iPartPair = particleList.begin(); iPartPair != particleList.end(); ++iPartPair) {
-          simb::MCParticle& p = *(iPartPair->second);
-          ++nGeneratedParticles;
-          partCol_->push_back(std::move(p));
-          art::Ptr<simb::MCParticle> mcp_ptr = art::Ptr<simb::MCParticle>(pid_,partCol_->size()-1,evt->productGetter(pid_));
-          tpassn_->addSingle(mct, mcp_ptr);
+
+      MF_LOG_INFO("endOfEventAction") << "Found " << mct->NParticles() << " particles" ;
+
+      unsigned int HowMany=0;
+      //for (auto iPartPair = particleList.begin(); iPartPair != particleList.end(); ++iPartPair) {
+      for(auto const& iPartPair: particleList) {
+          simb::MCParticle& p = *(iPartPair.second);
+          auto gen_index = fMCTIndexMap[ p.TrackId() ];
+          //mf::LogDebug("endOfEventAction") << "PrimaryTruthIndex: " << gen_index;
+          if (gen_index == mcl) {
+            ++nGeneratedParticles;
+            ++HowMany;
+
+            mf::LogDebug("endOfEventAction") << "Provenance = " << mclistHandle.provenance()->inputTag() << "':\n"
+                                            << "TrackID = " << p.TrackId()
+                                            << "\nPrimaryTruthIndex: " << gen_index;
+            sim::GeneratedParticleInfo const truthInfo {
+              GetPrimaryTruthIndex(p.TrackId())
+            };
+            if (!truthInfo.hasGeneratedParticleIndex() && (p.Mother() == 0)) {
+              MF_LOG_WARNING("endOfEvenAction") << "No GeneratedParticleIndex()!";
+              // this means it's primary but with no information; logic error!!
+              art::Exception error(art::errors::LogicError);
+              error << "Failed to match primary particle:\n";
+              //sim::dump::DumpMCParticle(error, p, "  ");
+              error << "\nwith particles from the truth record '"
+                << mclistHandle.provenance()->inputTag() << "':\n";
+              //sim::dump::DumpMCTruth(error, *mct, 2U, "  "); // 2 points per line
+              error << "\n";
+              throw error;
+            }
+            partCol_->push_back(std::move(p));
+            art::Ptr<simb::MCParticle> mcp_ptr = art::Ptr<simb::MCParticle>(pid_,partCol_->size()-1,evt->productGetter(pid_));
+            tpassn_->addSingle(mct, mcp_ptr, truthInfo);
+          }
         } // while(particleList)
+        mf::LogDebug("Offset") << "nGeneratedParticles = " << nGeneratedParticles;
     }
   }
   ResetTrackIDOffset();
-    // Every ACTION needs to write out their event data now
+  // Every ACTION needs to write out their event data now
   ahs -> fillEventWithArtStuff();
-}
+  }
 } // namespace LArG4
 using larg4::ParticleListActionService;
 DEFINE_ART_SERVICE(ParticleListActionService)
