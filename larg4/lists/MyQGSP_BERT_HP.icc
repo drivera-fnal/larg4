@@ -42,6 +42,7 @@
 // 16.08.2010 H.Kurashige: Remove inclusion of G4ParticleWithCuts 
 // 16.10.2012 A.Ribon: Use new default stopping
 // 09.10.2019 D.Rivera Modified for use with larg4
+// 12.10.2019 D.Rivera Added Radioactive Decay Physics
 //
 //----------------------------------------------------------------------------
 //
@@ -59,6 +60,7 @@
 #include "Geant4/G4MaterialTable.hh"
 
 #include "Geant4/G4DecayPhysics.hh"
+#include "Geant4/G4RadioactiveDecayPhysics.hh"
 #include "Geant4/G4EmStandardPhysics.hh"
 #include "Geant4/G4EmExtraPhysics.hh"
 #include "Geant4/G4IonPhysics.hh"
@@ -91,6 +93,7 @@ template<class T> TMyQGSP_BERT_HP<T>::TMyQGSP_BERT_HP(G4int ver):  T()
 
   // Decays
   this->RegisterPhysics( new G4DecayPhysics(ver) );
+  this->RegisterPhysics( new G4RadioactiveDecayPhysics(ver) );
 
    // Hadron Elastic scattering
   this-> RegisterPhysics( new G4HadronElasticPhysicsHP(ver) );

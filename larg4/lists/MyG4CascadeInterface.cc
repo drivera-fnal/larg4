@@ -158,10 +158,13 @@ MyG4CascadeInterface::MyG4CascadeInterface(const G4String& name)
   this->SetVerboseLevel(G4CascadeParameters::verbose());
   //this->SetVerboseLevel(3); //--really trying to get these print outs
 
-  if (G4CascadeParameters::usePreCompound())
+  if (G4CascadeParameters::usePreCompound()) {
     usePreCompoundDeexcitation();
-  else
+    G4cout << "Using PreCompoundDeexcitation!!" << G4endl;;
+  } else {
     useCascadeDeexcitation();
+    G4cout << "Using CascadeDeexcitation!!" << G4endl;;
+  }
 }
 
 MyG4CascadeInterface::~MyG4CascadeInterface() {
