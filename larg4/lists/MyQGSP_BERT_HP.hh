@@ -44,10 +44,6 @@
 #include "Geant4/G4VModularPhysicsList.hh"
 #include "Geant4/CompileTimeConstraints.hh"
 
-//#ifndef G4CASCADE_DEBUG_INTERFACE
-//#define G4CASCADE_DEBUG_INTERFACE 1
-//#endif
-
 template<class T>
 class TMyQGSP_BERT_HP: public T
 {

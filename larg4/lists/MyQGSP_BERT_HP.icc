@@ -67,13 +67,8 @@
 #include "Geant4/G4StoppingPhysics.hh"
 #include "Geant4/G4HadronElasticPhysicsHP.hh"
 
-///#define G4CASCADE_DEBUG_INTERFACE 1
-
 #include "Geant4/G4DataQuestionaire.hh"
-//#include "include/G4HadronPhysicsQGSP_BERT_HP.hh"
 #include "MyG4HadronPhysicsQGSP_BERT_HP.hh"
-///#include "larg4/larg4/lists/include/MyG4HadronPhysicsQGSP_BERT_HP.hh"
-////#include "larg4/larg4/lists/MyG4HadronPhysicsQGSP_BERT_HP.hh"
 
 template<class T> TMyQGSP_BERT_HP<T>::TMyQGSP_BERT_HP(G4int ver):  T()
 {
