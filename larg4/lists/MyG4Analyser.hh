@@ -33,7 +33,7 @@
 #define WITH_NUCLEI
 
 #include "Geant4/G4CollisionOutput.hh"
-//#include "G4InuclParticle.hh"
+#include "Geant4/G4InuclParticle.hh"
 #include "Geant4/G4InuclElementaryParticle.hh"
 #include "Geant4/G4InuclNuclei.hh"
 #include "Geant4/G4NuclWatcher.hh"
@@ -63,10 +63,12 @@ private:
   G4double averageProtonNumber;
   G4double averageNeutronNumber;
   G4double averagePionNumber;
+  G4double averagePhotonNumber;
   G4double averageNucleonKinEnergy;
   G4double averageProtonKinEnergy;
   G4double averageNeutronKinEnergy;
   G4double averagePionKinEnergy;
+  G4double averagePhotonKinEnergy;
   G4double averageExitationEnergy;
   G4double averageOutgoingNuclei;
   G4double fissy_prob;

@@ -156,7 +156,6 @@ MyG4CascadeInterface::MyG4CascadeInterface(const G4String& name)
   SetEnergyMomentumCheckLevels(5*perCent, 10*MeV);
   balance->setLimits(5*perCent, 10*MeV/GeV);	// Bertini internal units
   this->SetVerboseLevel(G4CascadeParameters::verbose());
-  //this->SetVerboseLevel(3); //--really trying to get these print outs
 
   if (G4CascadeParameters::usePreCompound()) {
     usePreCompoundDeexcitation();
@@ -351,7 +350,7 @@ MyG4CascadeInterface::ApplyYourself(const G4HadProjectile& aTrack,
 
   // Clean up and return final result;
   clear();
-/*
+
   G4int nSec = theParticleChange.GetNumberOfSecondaries();
   for (G4int i = 0; i < nSec; i++) {
     G4HadSecondary* sec = theParticleChange.GetSecondary(i);
@@ -360,7 +359,7 @@ MyG4CascadeInterface::ApplyYourself(const G4HadProjectile& aTrack,
       G4cout << dp->GetDefinition()->GetParticleName() << " has "
              << dp->GetKineticEnergy()/MeV << " MeV " << G4endl;
   }
-*/
+
   return &theParticleChange;
 }
 

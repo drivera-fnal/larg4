@@ -28,6 +28,8 @@
 // 20100726  M. Kelsey -- Use references for fetched lists
 // 20101010  M. Kelsey -- Migrate to integer A and Z
 // 20101019  M. Kelsey -- CoVerity report, unitialized constructor
+// 20200129  D. Rivera -- Fixed pi-, pi0, and pi+ counters
+// 20200324  D. Rivera -- Added photon counters, and photon averageKE info
 
 #include "MyG4Analyser.hh"
 #include <cmath>
@@ -36,12 +38,13 @@
 MyG4Analyser::MyG4Analyser()
   : verboseLevel(0), eventNumber(0.0), averageMultiplicity(0.0),
     averageProtonNumber(0.0), averageNeutronNumber(0.0),
-    averagePionNumber(0.0),  averageNucleonKinEnergy(0.0),
-    averageProtonKinEnergy(0.0), averageNeutronKinEnergy(0.0),
-    averagePionKinEnergy(0.0), averageExitationEnergy(0.0),
-    averageOutgoingNuclei(0.0), fissy_prob(0.0), averagePionPl(0.0),
+    averagePionNumber(0.0), averagePhotonNumber(0.0),
+    averageNucleonKinEnergy(0.0), averageProtonKinEnergy(0.0),
+    averageNeutronKinEnergy(0.0), averagePionKinEnergy(0.0), averagePhotonKinEnergy(0.0),
+    averageExitationEnergy(0.0), averageOutgoingNuclei(0.0), fissy_prob(0.0), averagePionPl(0.0),
     averagePionMin(0.0), averagePion0(0.0), averageA(0.0), averageZ(0.0),
-    inel_csec(0.0), withNuclei(false) {
+    inel_csec(0.0), withNuclei(true) {
+    // -- enable analyzer with Nuclei enabled
   if (verboseLevel > 3) {
     G4cout << " >>> MyG4Analyser::MyG4Analyser" << G4endl;
   }
@@ -165,6 +168,11 @@ void MyG4Analyser::analyse(const G4CollisionOutput& output) {
             zp = 0;
             averagePion0 += 1.0;
           };
+        } else if (particles[i].isPhoton()) {
+          averagePhotonKinEnergy += particles[i].getKineticEnergy();
+          averagePhotonNumber += 1.0;
+          ap = 0;
+          zp = 0;
         };
         try_watchers(ap, zp, false);
       };
@@ -203,6 +211,9 @@ void MyG4Analyser::analyse(const G4CollisionOutput& output) {
         } else if (particles[i].type() == 7) { 
           averagePion0 += 1.0;
         }
+      } else if (particles[i].isPhoton()) {
+        averagePhotonNumber +=1.0;
+        averagePhotonKinEnergy += particles[i].getKineticEnergy();
       }
     }
   }
@@ -226,6 +237,9 @@ void MyG4Analyser::printResultsSimple() {
                                                                    1.0e-10) << G4endl
          << " average pion number " << averagePionNumber / eventNumber << G4endl
          << " average pion Ekin " << averagePionKinEnergy / (averagePionNumber +
+                                                             1.0e-10) << G4endl
+         << " average photon number " << averagePhotonNumber / eventNumber << G4endl
+         << " average photon Ekin " << averagePhotonKinEnergy / (averagePhotonNumber +
                                                              1.0e-10) << G4endl;
   if (withNuclei) {
     G4cout                 
@@ -258,7 +272,10 @@ void MyG4Analyser::printResults() {
                                                              1.0e-10) << G4endl
          << " average pi+ " << averagePionPl / eventNumber << G4endl
          << " average pi- " << averagePionMin / eventNumber << G4endl
-         << " average pi0 " << averagePion0 / eventNumber << G4endl;
+         << " average pi0 " << averagePion0 / eventNumber << G4endl
+         << " average photon number " << averagePhotonNumber / eventNumber << G4endl
+         << " average photon Ekin " << averagePhotonKinEnergy / (averagePhotonNumber +
+                                                             1.0e-10) << G4endl;
                    
   if (withNuclei) {
     G4cout
@@ -341,7 +358,7 @@ void MyG4Analyser::printResultsNtuple() {
     G4cout << " >>> MyG4Analyser::printResultsNtuple" << G4endl;
   }
 
-  // Create one line of ACII data. 
+  // Create one line of ASCII data. 
   // Several runs should create ntuple for data-analysis 
   G4cout <<
     std::setw(15) << int(eventNumber + 0.1) <<
@@ -352,5 +369,7 @@ void MyG4Analyser::printResultsNtuple() {
     std::setw(15) << averageProtonKinEnergy / (averageProtonNumber + 1.0e-10) << " " <<
     std::setw(15) << averageNeutronKinEnergy / (averageNeutronNumber + 1.0e-10) << " " <<
     std::setw(15) << averagePionNumber / eventNumber << " " <<
-    std::setw(15) << averagePionKinEnergy / (averagePionNumber + 1.0e-10) << G4endl;
+    std::setw(15) << averagePionKinEnergy / (averagePionNumber + 1.0e-10) << " " <<
+    std::setw(15) << averagePhotonNumber / eventNumber << " " <<
+    std::setw(15) << averagePhotonKinEnergy / (averagePhotonNumber + 1.0e-10) << G4endl;
 }
