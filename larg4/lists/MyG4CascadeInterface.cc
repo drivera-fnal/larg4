@@ -352,6 +352,7 @@ MyG4CascadeInterface::ApplyYourself(const G4HadProjectile& aTrack,
   clear();
 
   G4int nSec = theParticleChange.GetNumberOfSecondaries();
+  G4cout << "Number of secondaries = " << nSec << G4endl;
   for (G4int i = 0; i < nSec; i++) {
     G4HadSecondary* sec = theParticleChange.GetSecondary(i);
     G4DynamicParticle* dp = sec->GetParticle();
@@ -461,6 +462,8 @@ G4bool MyG4CascadeInterface::createBullet(const G4HadProjectile& aTrack) {
   const G4ParticleDefinition* trkDef = aTrack.GetDefinition();
   G4int bulletType = 0;			// For elementary particles
   G4int bulletA = 0, bulletZ = 0;	// For nucleus projectile
+  // -- D.R. attempt to book-keep the model for all particles
+  //G4InuclParticle::Model bulletM = G4InuclParticle::bullet;
 
   if (trkDef->GetAtomicMass() <= 1) {
     bulletType = G4InuclElementaryParticle::type(trkDef);
@@ -491,10 +494,10 @@ G4bool MyG4CascadeInterface::createBullet(const G4HadProjectile& aTrack) {
 				 projectileMomentum.e());
   
   if (G4InuclElementaryParticle::valid(bulletType)) {
-    hadronBullet.fill(momentumBullet, bulletType);
+    hadronBullet.fill(momentumBullet, bulletType, G4InuclParticle::bullet);
     bullet = &hadronBullet;
   } else {
-    nucleusBullet.fill(momentumBullet, bulletA, bulletZ);
+    nucleusBullet.fill(momentumBullet, bulletA, bulletZ, 0., G4InuclParticle::bullet);
     bullet = &nucleusBullet;
   }
 
@@ -515,11 +518,14 @@ G4bool MyG4CascadeInterface::createTarget(G4V3DNucleus* theNucleus) {
 }
 
 G4bool MyG4CascadeInterface::createTarget(G4int A, G4int Z) {
+  // -- D.R. attempt to book-keep the model for all particles
+  //G4InuclParticle::Model targetM = G4InuclParticle::target;
+
   if (A > 1) {
-    nucleusTarget.fill(A, Z);
+    nucleusTarget.fill(A, Z, 0., G4InuclParticle::target);
     target = &nucleusTarget;
   } else {
-    hadronTarget.fill(0., (Z==1?proton:neutron));
+    hadronTarget.fill(0., (Z==1?proton:neutron), G4InuclParticle::target);
     target = &hadronTarget;
   }
 
