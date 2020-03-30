@@ -30,6 +30,7 @@
 // 20101019  M. Kelsey -- CoVerity report, unitialized constructor
 // 20200129  D. Rivera -- Fixed pi-, pi0, and pi+ counters
 // 20200324  D. Rivera -- Added photon counters, and photon averageKE info
+// 20200325  D. Rivera -- Added Model counter
 
 #include "MyG4Analyser.hh"
 #include <cmath>
@@ -47,6 +48,11 @@ MyG4Analyser::MyG4Analyser()
     // -- enable analyzer with Nuclei enabled
   if (verboseLevel > 3) {
     G4cout << " >>> MyG4Analyser::MyG4Analyser" << G4endl;
+  }
+
+  for (auto const &[i,model] : modelMap){
+    modelCounterMap.emplace(i,std::make_pair(model, 0));
+    G4cout << "Entry " << i << " : " << model;
   }
 }
 
@@ -134,6 +140,9 @@ void MyG4Analyser::analyse(const G4CollisionOutput& output) {
       for (G4int i = 0; i < G4int(particles.size()); i++) {
         G4int ap = 0;
         G4int zp = 0;
+        G4InuclParticle::Model model = particles[i].getModel();
+        G4int modelId = (G4int)model;
+        modelCounterMap[modelId].second +=1;
 
         if (particles[i].nucleon()) {
           averageNucleonKinEnergy += particles[i].getKineticEnergy();
@@ -185,6 +194,9 @@ void MyG4Analyser::analyse(const G4CollisionOutput& output) {
     averageMultiplicity += particles.size();
 
     for (G4int i = 0; i < G4int(particles.size()); i++) {
+      G4InuclParticle::Model model = particles[i].getModel();
+      G4int modelId = (G4int)model;
+      modelCounterMap[modelId].second +=1;
 
       if (particles[i].nucleon()) {
         averageNucleonKinEnergy += particles[i].getKineticEnergy();
@@ -287,6 +299,10 @@ void MyG4Analyser::printResults() {
     G4cout << " fission prob. " << fissy_prob / eventNumber << " c.sec " <<
       inel_csec * fissy_prob / eventNumber << G4endl;
     handleWatcherStatistics();
+  }
+  G4cout << "//////////-Model Statistics-//////////" << G4endl;
+  for(auto const &[m,info] : modelCounterMap){
+    G4cout << "Model " << info.first << " : " << info.second << G4endl;
   }
 }
 

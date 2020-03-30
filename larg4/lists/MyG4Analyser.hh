@@ -40,6 +40,21 @@
 //#include "G4ExitonConfiguration.hh"
 
 #include <vector>
+#include <map>
+
+const std::map<G4int,std::string> modelMap = {
+  {0,"default"},
+  {1,"bullet"},
+  {2,"target"},
+  {3,"G4ElementaryParticleCollider"},
+  {4,"G4IntraNucleiCascader"},
+  {5,"G4NonEquilibriumEvaporator"},
+  {6,"G4EquilibriumEvaporator"},
+  {7,"G4Fissioner"},
+  {8,"G4BigBanger"},
+  {9,"G4PreCompound"},
+  {10,"G4CascadeCoalescence"}
+};
 
 class MyG4Analyser {
 
@@ -80,6 +95,8 @@ private:
   std::vector<G4NuclWatcher> ana_watchers;
   G4double inel_csec;
   G4bool withNuclei;
+
+  std::map<G4int, std::pair<std::string,G4int> > modelCounterMap;
 };        
 
 #endif // MYG4ANALYSER_HH
