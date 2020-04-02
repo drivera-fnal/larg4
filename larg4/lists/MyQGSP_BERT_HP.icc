@@ -46,7 +46,6 @@
 //
 //----------------------------------------------------------------------------
 //
-
 #include <iomanip>   
 
 #include "Geant4/globals.hh"
@@ -68,6 +67,7 @@
 #include "Geant4/G4HadronElasticPhysicsHP.hh"
 
 #include "Geant4/G4DataQuestionaire.hh"
+//#include "Geant4/G4HadronPhysicsQGSP_BERT_HP.hh"
 #include "MyG4HadronPhysicsQGSP_BERT_HP.hh"
 
 template<class T> TMyQGSP_BERT_HP<T>::TMyQGSP_BERT_HP(G4int ver):  T()
