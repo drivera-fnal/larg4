@@ -28,6 +28,8 @@
 // 20100726  M. Kelsey -- Use references for fetched lists
 // 20101010  M. Kelsey -- Migrate to integer A and Z
 // 20101019  M. Kelsey -- CoVerity report, unitialized constructor
+// 20191209  D. Rivera -- Copy based on:
+//    geant4.10.03.p03/source/processes/hadronic/models/cascade/cascade/src/G4Analyser.cc
 // 20200129  D. Rivera -- Fixed pi-, pi0, and pi+ counters
 // 20200324  D. Rivera -- Added photon counters, and photon averageKE info
 // 20200325  D. Rivera -- Added Model counter
@@ -52,7 +54,7 @@ MyG4Analyser::MyG4Analyser()
 
   for (auto const &[i,model] : modelMap){
     modelCounterMap.emplace(i,std::make_pair(model, 0));
-    G4cout << "Entry " << i << " : " << model;
+    G4cout << "Entry " << i << " : " << model << G4endl;
   }
 }
 

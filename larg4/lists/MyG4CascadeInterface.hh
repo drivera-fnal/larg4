@@ -58,6 +58,8 @@
 // 20130628  M. Kelsey -- Address Coverity warnings about copy operations.
 // 20140116  M. Kelsey -- Move statics to const data members to avoid weird
 //		interactions with MT.
+// 20191209  D. Rivera -- copy based on:
+//    geant4.10.03.p03/source/processes/hadronic/models/cascade/cascade/src/G4CascadeHistory.cc
 
 #ifndef MyG4CASCADEINTERFACE_H
 #define MyG4CASCADEINTERFACE_H 1
@@ -80,12 +82,14 @@
 
 #define MYG4CASCADE_DEBUG_INTERFACE 1
 
+class MyG4InuclCollider;
+
 class G4CascadParticle;
 class G4CascadeCheckBalance;
 class G4CollisionOutput;
 class G4DynamicParticle;
 class G4HadFinalState;
-class G4InuclCollider;
+//class G4InuclCollider;
 class G4InuclParticle;
 class G4ParticleDefinition;
 class G4V3DNucleus;
@@ -170,7 +174,7 @@ private:
 
   G4int numberOfTries;
 
-  G4InuclCollider* collider;
+  MyG4InuclCollider* collider;
   G4CascadeCheckBalance* balance;
 
   G4InuclParticle* bullet;		// Pointers to last filled versions
@@ -193,4 +197,4 @@ private:
   MyG4CascadeInterface& operator=(const MyG4CascadeInterface&);
 };
 
-#endif // MyG4CASCADEINTERFACE_H
+#endif // MYG4CASCADEINTERFACE_H

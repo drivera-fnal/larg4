@@ -26,6 +26,8 @@
 // $Id: MyG4Analyser.hh 66241 2012-12-13 18:34:42Z gunter $
 //
 // 20101010  M. Kelsey -- Migrate to integer A and Z
+// 20191209  D. Rivera -- Copy based on:
+//    geant4.10.03.p03/source/processes/hadronic/models/cascade/cascade/include/G4Analyser.hh
 
 #ifndef MYG4ANALYSER_HH
 #define MYG4ANALYSER_HH

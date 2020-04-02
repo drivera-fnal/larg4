@@ -23,7 +23,7 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-// $Id: MyG4BertiniPiKBuilder.hh 66892 2013-01-17 10:57:59Z gunter $
+// $Id: G4BertiniPiKBuilder.hh 66892 2013-01-17 10:57:59Z gunter $
 //
 //---------------------------------------------------------------------------
 //
@@ -33,6 +33,8 @@
 //
 // Modified:
 // 30.03.2009 V.Ivanchenko create cross section by new
+// 09.12.2019 D. Rivera copy based on:
+//    geant4.10.03.p03/source/physics_lists/builders/include/G4BertiniPiKBuilder.hh
 //
 //----------------------------------------------------------------------------
 //
@@ -48,7 +50,9 @@
 #include "Geant4/G4VPiKBuilder.hh"
 
 #include "Geant4/G4PiNuclearCrossSection.hh"
-#include "MyG4CascadeInterface.hh"   
+//#include "Geant4/G4CascadeInterface.hh"
+
+#include "MyG4CascadeInterface.hh"
 
 class MyG4BertiniPiKBuilder : public G4VPiKBuilder
 {

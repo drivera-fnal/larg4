@@ -102,11 +102,15 @@
 // 20140929  M. Kelsey -- Explicitly call useCascadeDeexcitation() in ctor
 // 20150506  M. Kelsey -- Call Initialize() in ctor for master thread only
 // 20150608  M. Kelsey -- Label all while loops as terminating.
+// 20191209  D. Rivera -- copy based on:
+//    geant4.10.03.p03/source/processes/hadronic/models/cascade/cascade/src/G4CascadeInterface.cc
 
 #include <cmath>
 #include <iostream>
 
 #include "MyG4CascadeInterface.hh"
+#include "MyG4InuclCollider.hh"
+
 #include "Geant4/globals.hh"
 #include "Geant4/G4SystemOfUnits.hh"
 #include "Geant4/G4CascadeChannelTables.hh"
@@ -116,7 +120,7 @@
 #include "Geant4/G4DecayKineticTracks.hh"
 #include "Geant4/G4DynamicParticle.hh"
 #include "Geant4/G4HadronicException.hh"
-#include "Geant4/G4InuclCollider.hh"
+//#include "Geant4/G4InuclCollider.hh"
 #include "Geant4/G4InuclElementaryParticle.hh"
 #include "Geant4/G4InuclNuclei.hh"
 #include "Geant4/G4InuclParticle.hh"
@@ -147,7 +151,7 @@ MyG4CascadeInterface::MyG4CascadeInterface(const G4String& name)
   : G4VIntraNuclearTransportModel(name), 
     randomFile(G4CascadeParameters::randomFile()),
     maximumTries(20), numberOfTries(0),
-    collider(new G4InuclCollider), balance(new G4CascadeCheckBalance(name)),
+    collider(new MyG4InuclCollider), balance(new G4CascadeCheckBalance(name)),
     //<--bullet(0), target(0), output(new G4CollisionOutput) {
     bullet(0), target(0), output(new G4CollisionOutput), analyzer(new MyG4Analyser) {
   // Set up global objects for master thread or sequential build
@@ -264,7 +268,7 @@ MyG4CascadeInterface::ApplyYourself(const G4HadProjectile& aTrack,
 #ifdef MYG4CASCADE_DEBUG_INTERFACE
   static G4int counter(0);
   counter++;
-  G4cerr << "Reaction number "<< counter << " "
+  G4cout << "Reaction number "<< counter << " "
 	 << aTrack.GetDefinition()->GetParticleName() << " "
 	 << aTrack.GetKineticEnergy() << " MeV" << G4endl;
 #endif

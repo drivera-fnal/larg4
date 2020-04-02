@@ -32,12 +32,15 @@
 // Author: 2002 H.P. Wellisch
 //
 // Modified:
-// 02.04.2009 V.Ivanchenko remove add cross section, string builderis reponsible 
+// 02.04.2009 V.Ivanchenko remove add cross section, string builderis reponsible
+// 09.12.2019 D. Rivera copy based on:
+//    geant4.10.03.p03/source/physics_lists/builders/src/G4BertiniPiKBuilder.cc
 //
 //----------------------------------------------------------------------------
 //
-//#include "G4BertiniPiKBuilder.hh"
 #include "MyG4BertiniPiKBuilder.hh"
+
+//#include "Geant4/G4BertiniPiKBuilder.hh"
 #include "Geant4/G4SystemOfUnits.hh"
 #include "Geant4/G4ParticleDefinition.hh"
 #include "Geant4/G4ParticleTable.hh"

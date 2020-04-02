@@ -27,13 +27,15 @@
 //
 //---------------------------------------------------------------------------
 //
-// ClassName:   G4BertiniPionBuilder
+// ClassName:   MyG4BertiniPionBuilder
 //
 // Author: 2010 G.Folger
 //  devired from G4BertiniPiKBuilder
 //
 // Modified:
 // 30.03.2009 V.Ivanchenko create cross section by new
+// 09.12.2019 D. Rivera copy based on:
+//    geant4.10.03.p03/source/physics_lists/builders/include/G4BertiniPionBuilder.hh
 //
 //----------------------------------------------------------------------------
 //
@@ -49,7 +51,9 @@
 #include "Geant4/G4VPionBuilder.hh"
 
 #include "Geant4/G4PiNuclearCrossSection.hh"
-#include "MyG4CascadeInterface.hh"   
+//#include "Geant4/G4CascadeInterface.hh"
+
+#include "MyG4CascadeInterface.hh"
 
 class MyG4BertiniPionBuilder : public G4VPionBuilder
 {
