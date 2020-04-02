@@ -38,13 +38,15 @@
 // 25.04.2007 G.Folger: Add code for quasielastic
 // 31.10.2012 A.Ribon: Use G4MiscBuilder
 // 19.03.2013 A.Ribon: Replace LEP with FTFP
-// 10.17.2019 D.Rivera: adapt in larg4
+// 17.10.2019 D.Rivera: adapt in larg4. Copy based on:
+//    geant4.10.03.p03/source/physics_lists/constructors/hadron_inelastic/src/G4HadronPhysicsQGSP_BERT_HP.cc
 //
 //----------------------------------------------------------------------------
 //
 #include <iomanip>   
 
 #include "MyG4HadronPhysicsQGSP_BERT_HP.hh"
+//#include "Geant4/G4HadronPhysicsQGSP_BERT_HP.hh"
 
 #include "Geant4/globals.hh"
 #include "Geant4/G4ios.hh"
@@ -142,7 +144,8 @@ void MyG4HadronPhysicsQGSP_BERT_HP::CreateModels()
   tpdata->theFTFPNeutron->SetMinEnergy(minFTFP);
   tpdata->theFTFPNeutron->SetMaxEnergy(maxFTFP);
 
-  tpdata->theNeutrons->RegisterMe(tpdata->theBertiniNeutron=new G4BertiniNeutronBuilder);
+  //<--tpdata->theNeutrons->RegisterMe(tpdata->theBertiniNeutron=new G4BertiniNeutronBuilder);
+  tpdata->theNeutrons->RegisterMe(tpdata->theBertiniNeutron=new MyG4BertiniNeutronBuilder);
   tpdata->theBertiniNeutron->SetMinEnergy(maxHP);
   tpdata->theBertiniNeutron->SetMaxEnergy(maxBERT);
 
@@ -154,7 +157,8 @@ void MyG4HadronPhysicsQGSP_BERT_HP::CreateModels()
   tpdata->thePro->RegisterMe(tpdata->theFTFPPro=new G4FTFPProtonBuilder(quasiElasticFTF));
   tpdata->theFTFPPro->SetMinEnergy(minFTFP);
   tpdata->theFTFPPro->SetMaxEnergy(maxFTFP);
-  tpdata->thePro->RegisterMe(tpdata->theBertiniPro=new G4BertiniProtonBuilder);
+  //<--tpdata->thePro->RegisterMe(tpdata->theBertiniPro=new G4BertiniProtonBuilder);
+  tpdata->thePro->RegisterMe(tpdata->theBertiniPro=new MyG4BertiniProtonBuilder);
   tpdata->theBertiniPro->SetMaxEnergy(maxBERT);
 
   tpdata->thePiK=new G4PiKBuilder;
@@ -166,7 +170,8 @@ void MyG4HadronPhysicsQGSP_BERT_HP::CreateModels()
   tpdata->thePiK->RegisterMe(tpdata->theBertiniPiK=new MyG4BertiniPiKBuilder);
   tpdata->theBertiniPiK->SetMaxEnergy(maxBERT);
 
-  tpdata->theHyperon=new G4HyperonFTFPBuilder;
+  //<--tpdata->theHyperon=new G4HyperonFTFPBuilder;
+  tpdata->theHyperon=new MyG4HyperonFTFPBuilder;
 
   tpdata->theAntiBaryon=new G4AntiBarionBuilder;
   tpdata->theAntiBaryon->RegisterMe(tpdata->theFTFPAntiBaryon=new G4FTFPAntiBarionBuilder(quasiElasticFTF));
