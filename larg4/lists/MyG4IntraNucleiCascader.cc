@@ -687,11 +687,11 @@ MyG4IntraNucleiCascader::createTarget(G4V3DNucleus* theNucleus) {
   
   if (theNucleusA > 1) {
     if (!nucleusTarget) nucleusTarget = new G4InuclNuclei;      // Just in case
-    nucleusTarget->fill(0., theNucleusA, theNucleusZ, 0.);
+    nucleusTarget->fill(0., theNucleusA, theNucleusZ, 0., G4InuclParticle::target); //set model
     return nucleusTarget;
   } else {
     if (!protonTarget) protonTarget = new G4InuclElementaryParticle;
-    protonTarget->fill(0., (theNucleusZ==1)?proton:neutron);
+    protonTarget->fill(0., (theNucleusZ==1)?proton:neutron, G4InuclParticle::target); //set model
     return protonTarget;
   }
 
@@ -789,7 +789,7 @@ void MyG4IntraNucleiCascader::processSecondary(const G4KineticTrack* ktrack) {
   G4CascadParticle& cpart = cascad_particles.back();
 
   // Convert momentum to Bertini internal units
-  cpart.getParticle().fill(ktrack->Get4Momentum()/GeV, ktype);
+  cpart.getParticle().fill(ktrack->Get4Momentum()/GeV, ktype, G4InuclParticle::INCascader); //set model
   cpart.setGeneration(1);
   cpart.setMovingInsideNuclei();
   cpart.initializePath(0);
@@ -822,7 +822,7 @@ void MyG4IntraNucleiCascader::releaseSecondary(const G4KineticTrack* ktrack) {
     G4InuclNuclei& inucl = output.getOutgoingNuclei().back();
 
     inucl.fill(ktrack->Get4Momentum()/GeV,
-               kpd->GetAtomicMass(), kpd->GetAtomicNumber());
+               kpd->GetAtomicMass(), kpd->GetAtomicNumber(),G4InuclParticle::INCascader); //set model
     if (verboseLevel > 2)
       G4cout << " Created pre-cascade fragment\n" << inucl << G4endl;
   } else {
