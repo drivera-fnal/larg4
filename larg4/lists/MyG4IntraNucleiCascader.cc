@@ -126,6 +126,8 @@
 
 #include "MyG4IntraNucleiCascader.hh"
 #include "MyG4CascadeHistory.hh"
+#include "MyG4ElementaryParticleCollider.hh"
+#include "MyG4NucleiModel.hh"
 
 //#include "Geant4/G4IntraNucleiCascader.hh"
 #include "Geant4/G4SystemOfUnits.hh"
@@ -138,7 +140,7 @@
 #include "Geant4/G4CollisionOutput.hh"
 #include "Geant4/G4DecayProducts.hh"
 #include "Geant4/G4DecayTable.hh"
-#include "Geant4/G4ElementaryParticleCollider.hh"
+//#include "Geant4/G4ElementaryParticleCollider.hh"
 #include "Geant4/G4ExitonConfiguration.hh"
 #include "Geant4/G4Exp.hh"
 #include "Geant4/G4HadTmpUtil.hh"
@@ -150,7 +152,7 @@
 #include "Geant4/G4KineticTrackVector.hh"
 #include "Geant4/G4LorentzConvertor.hh"
 #include "Geant4/G4Neutron.hh"
-#include "Geant4/G4NucleiModel.hh"
+//#include "Geant4/G4NucleiModel.hh"
 #include "Geant4/G4ParticleLargerEkin.hh"
 #include "Geant4/G4Proton.hh"
 #include "Geant4/G4V3DNucleus.hh"
@@ -170,8 +172,8 @@ const G4double MyG4IntraNucleiCascader::quasielast_cut = 1*MeV;
 typedef std::vector<G4InuclElementaryParticle>::iterator particleIterator;
 
 MyG4IntraNucleiCascader::MyG4IntraNucleiCascader()
-  : G4CascadeColliderBase("MyG4IntraNucleiCascader"), model(new G4NucleiModel),
-    theElementaryParticleCollider(new G4ElementaryParticleCollider),
+  : MyG4CascadeColliderBase("MyG4IntraNucleiCascader"), model(new MyG4NucleiModel),
+    theElementaryParticleCollider(new MyG4ElementaryParticleCollider),
     theRecoilMaker(new G4CascadeRecoilMaker), theClusterMaker(0),
     theCascadeHistory(0), tnuclei(0), bnuclei(0), bparticle(0),
     minimum_recoil_A(0.), coulombBarrier(0.),
@@ -195,7 +197,7 @@ MyG4IntraNucleiCascader::~MyG4IntraNucleiCascader() {
 }
 
 void MyG4IntraNucleiCascader::setVerboseLevel(G4int verbose) {
-  G4CascadeColliderBase::setVerboseLevel(verbose);
+  MyG4CascadeColliderBase::setVerboseLevel(verbose);
   model->setVerboseLevel(verbose);
   theElementaryParticleCollider->setVerboseLevel(verbose);
   theRecoilMaker->setVerboseLevel(verbose);
@@ -338,7 +340,7 @@ void MyG4IntraNucleiCascader::setupCascade() {
     G4int ab = bnuclei->getA();
     G4int zb = bnuclei->getZ();
     
-    G4NucleiModel::modelLists all_particles;    // Buffer to receive lists
+    MyG4NucleiModel::modelLists all_particles;    // Buffer to receive lists
     model->initializeCascad(bnuclei, tnuclei, all_particles);
     
     cascad_particles = all_particles.first;

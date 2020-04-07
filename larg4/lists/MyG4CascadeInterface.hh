@@ -61,8 +61,8 @@
 // 20191209  D. Rivera -- copy based on:
 //    geant4.10.03.p03/source/processes/hadronic/models/cascade/cascade/src/G4CascadeHistory.cc
 
-#ifndef MyG4CASCADEINTERFACE_H
-#define MyG4CASCADEINTERFACE_H 1
+#ifndef MYG4CASCADEINTERFACE_H
+#define MYG4CASCADEINTERFACE_H 1
 
 #include "Geant4/G4VIntraNuclearTransportModel.hh"
 #include "Geant4/G4FragmentVector.hh"

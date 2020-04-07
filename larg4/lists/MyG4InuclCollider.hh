@@ -48,13 +48,16 @@
 #ifndef MYG4INUCL_COLLIDER_HH
 #define MYG4INUCL_COLLIDER_HH
 
-#include "Geant4/G4CascadeColliderBase.hh"
+#include "MyG4CascadeColliderBase.hh"
+
+//#include "Geant4/G4CascadeColliderBase.hh"
 #include "Geant4/G4CollisionOutput.hh"
 
 class MyG4IntraNucleiCascader;
+class MyG4ElementaryParticleCollider;
 
 class G4CascadParticle;
-class G4ElementaryParticleCollider;
+//class G4ElementaryParticleCollider;
 //class G4IntraNucleiCascader;
 class G4InuclParticle;
 class G4KineticTrackVector;
@@ -62,7 +65,7 @@ class G4V3DNucleus;
 class G4VCascadeDeexcitation;
 
 
-class MyG4InuclCollider : public G4CascadeColliderBase {
+class MyG4InuclCollider : public MyG4CascadeColliderBase {
 public:
   MyG4InuclCollider();
   virtual ~MyG4InuclCollider();
@@ -87,7 +90,7 @@ protected:
   G4bool photonuclearOkay(G4CollisionOutput& checkOutput) const;
 
 private: 
-  G4ElementaryParticleCollider* theElementaryParticleCollider;
+  MyG4ElementaryParticleCollider* theElementaryParticleCollider;
   MyG4IntraNucleiCascader* theIntraNucleiCascader;
 
   G4VCascadeDeexcitation* theDeexcitation;	// User switchable!

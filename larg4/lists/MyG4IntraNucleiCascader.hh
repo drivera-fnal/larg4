@@ -70,27 +70,31 @@
 #ifndef MYG4INTRA_NUCLEI_CASCADER_HH
 #define MYG4INTRA_NUCLEI_CASCADER_HH
 
-#include "Geant4/G4CascadeColliderBase.hh"
+#include "MyG4CascadeColliderBase.hh"
+
+//#include "Geant4/G4CascadeColliderBase.hh"
 #include "Geant4/G4CollisionOutput.hh"
 #include "Geant4/G4ThreeVector.hh"
 #include <vector>
 
 class MyG4CascadeHistory;
+class MyG4ElementaryParticleCollider;
+class MyG4NucleiModel;
 
 class G4CascadParticle;
 class G4CascadeCoalescence;
 //class G4CascadeHistory;
 class G4CascadeRecoilMaker;
-class G4ElementaryParticleCollider;
+//class G4ElementaryParticleCollider;
 class G4InuclElementaryParticle;
 class G4InuclParticle;
 class G4KineticTrack;
 class G4KineticTrackVector;
-class G4NucleiModel;
+//class G4NucleiModel;
 class G4V3DNucleus;
 
 
-class MyG4IntraNucleiCascader : public G4CascadeColliderBase {
+class MyG4IntraNucleiCascader : public MyG4CascadeColliderBase {
 public:
   MyG4IntraNucleiCascader();
   virtual ~MyG4IntraNucleiCascader();
@@ -140,8 +144,8 @@ protected:
   G4bool particleCanInteract(const G4CascadParticle& cpart) const;
 
 private: 
-  G4NucleiModel* model;
-  G4ElementaryParticleCollider* theElementaryParticleCollider;
+  MyG4NucleiModel* model;
+  MyG4ElementaryParticleCollider* theElementaryParticleCollider;
   G4CascadeRecoilMaker* theRecoilMaker;
   G4CascadeCoalescence* theClusterMaker;
   MyG4CascadeHistory* theCascadeHistory;

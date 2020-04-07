@@ -76,12 +76,13 @@
 
 #include "MyG4InuclCollider.hh"
 #include "MyG4IntraNucleiCascader.hh"
+#include "MyG4ElementaryParticleCollider.hh"
 
 #include "Geant4/G4CascadeChannelTables.hh"
 #include "Geant4/G4CascadeCheckBalance.hh"
 #include "Geant4/G4CascadeDeexcitation.hh"
 #include "Geant4/G4CollisionOutput.hh"
-#include "Geant4/G4ElementaryParticleCollider.hh"
+//#include "Geant4/G4ElementaryParticleCollider.hh"
 //#include "Geant4/G4IntraNucleiCascader.hh"
 #include "Geant4/G4InuclElementaryParticle.hh"
 #include "Geant4/G4InuclNuclei.hh"
@@ -90,8 +91,8 @@
 
 
 MyG4InuclCollider::MyG4InuclCollider()
-  : G4CascadeColliderBase("MyG4InuclCollider"),
-    theElementaryParticleCollider(new G4ElementaryParticleCollider),
+  : MyG4CascadeColliderBase("MyG4InuclCollider"),
+    theElementaryParticleCollider(new MyG4ElementaryParticleCollider),
     theIntraNucleiCascader(new MyG4IntraNucleiCascader),
     theDeexcitation(new G4PreCompoundDeexcitation) {}
 
@@ -104,7 +105,7 @@ MyG4InuclCollider::~MyG4InuclCollider() {
 
 // Set verbosity and pass on to member objects
 void MyG4InuclCollider::setVerboseLevel(G4int verbose) {
-  G4CascadeColliderBase::setVerboseLevel(verbose);
+  MyG4CascadeColliderBase::setVerboseLevel(verbose);
 
   theElementaryParticleCollider->setVerboseLevel(verboseLevel);
   theIntraNucleiCascader->setVerboseLevel(verboseLevel);
