@@ -173,6 +173,8 @@ void MyG4InuclCollider::collide(G4InuclParticle* bullet, G4InuclParticle* target
   G4int btype = 0;
   G4int ab = 0;
   G4int zb = 0;
+  // -- retrive G4InuclParticle::Model
+  G4InuclParticle::Model mod = interCase.getBullet()->getModel();
   
   if (interCase.hadNucleus()) { 	// particle with nuclei
     G4InuclElementaryParticle* pbullet = 
@@ -232,9 +234,9 @@ void MyG4InuclCollider::collide(G4InuclParticle* bullet, G4InuclParticle* target
   // Need to make copy of bullet with momentum realigned
   G4InuclParticle* zbullet = 0;
   if (interCase.hadNucleus())
-    zbullet = new G4InuclElementaryParticle(bmom, btype);
+    zbullet = new G4InuclElementaryParticle(bmom, btype, mod); // -- inherit model
   else
-    zbullet = new G4InuclNuclei(bmom, ab, zb);
+    zbullet = new G4InuclNuclei(bmom, ab, zb, mod); // -- inherit model
 
   G4int itry = 0;
   while (itry < itry_max) {	/* Loop checking 08.06.2015 MHK */
