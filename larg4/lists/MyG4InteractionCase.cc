@@ -45,6 +45,8 @@ void MyG4InteractionCase::set(G4InuclParticle* part1,
   clear();              // Reset everything in case of failure
 
   // See which one of the two (or both) is a nucleus
+  G4cout << " >>> MyG4InteractionCase::set part1 model is : " << part1->getModel() << G4endl;
+  G4cout << " >>> MyG4InteractionCase::set part2 model is : " << part2->getModel() << G4endl;
   G4InuclNuclei* nucl1 = dynamic_cast<G4InuclNuclei*>(part1);
   G4InuclNuclei* nucl2 = dynamic_cast<G4InuclNuclei*>(part2);
 
@@ -74,4 +76,9 @@ void MyG4InteractionCase::set(G4InuclParticle* part1,
     bullet = part1;
     target = part2;
   }
+
+  //bullet->setModel(G4InuclParticle::bullet);
+  target->setModel(G4InuclParticle::target); // -- set target model (instead of DefaultModel)
+  G4cout << " >>> MyG4InteractionCase::set final part1 model is : " << part1->getModel() << G4endl;
+  G4cout << " >>> MyG4InteractionCase::set final part2 model is : " << part2->getModel() << G4endl;
 }

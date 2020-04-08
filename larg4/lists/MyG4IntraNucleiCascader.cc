@@ -264,7 +264,9 @@ G4bool MyG4IntraNucleiCascader::initialize(G4InuclParticle* bullet,
   // Configure processing modules
   theRecoilMaker->setTolerance(small_ekin);
 
+  G4cout << " >>> MyG4IntraNucleiCascader::initialize before interCase.set()" << G4endl;
   interCase.set(bullet,target);         // Classify collision type
+  G4cout << " >>> MyG4IntraNucleiCascader::initialize after interCase.set()" << G4endl;
 
   if (verboseLevel > 3) {
     G4cout << *interCase.getBullet() << G4endl
@@ -684,6 +686,10 @@ MyG4IntraNucleiCascader::finalize(G4int itry, G4InuclParticle* bullet,
 
 G4InuclParticle* 
 MyG4IntraNucleiCascader::createTarget(G4V3DNucleus* theNucleus) {
+
+  if (verboseLevel>1)
+    G4cout << " >>> MyG4IntraNucleiCascader::createTarget" << G4endl;
+
   G4int theNucleusA = theNucleus->GetMassNumber();
   G4int theNucleusZ = theNucleus->GetCharge();
   
@@ -846,6 +852,9 @@ void MyG4IntraNucleiCascader::
 processTrappedParticle(const G4CascadParticle& trapped) {
   const G4InuclElementaryParticle& trappedP = trapped.getParticle();
 
+  if (verboseLevel > 1)
+    G4cout << " >>> MyG4IntraNucleiCascader::processTrappedParticle" << G4endl;
+
   G4int xtype = trappedP.type();
   if (verboseLevel > 3) G4cout << " exciton of type " << xtype << G4endl;
   
@@ -876,6 +885,9 @@ processTrappedParticle(const G4CascadParticle& trapped) {
 
 void MyG4IntraNucleiCascader::
 decayTrappedParticle(const G4CascadParticle& trapped) {
+  if (verboseLevel > 1)
+    G4cout << " >>> MyG4IntraNucleiCascader::decayTrappedParticle" << G4endl;
+
   if (verboseLevel > 3) 
     G4cout << " unstable must be decayed in flight" << G4endl;
 
