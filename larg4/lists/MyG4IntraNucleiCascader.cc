@@ -182,8 +182,10 @@ MyG4IntraNucleiCascader::MyG4IntraNucleiCascader()
   if (G4CascadeParameters::doCoalescence())
     theClusterMaker = new G4CascadeCoalescence;
 
-  if (G4CascadeParameters::showHistory())
+  if (G4CascadeParameters::showHistory()){
     theCascadeHistory = new MyG4CascadeHistory;
+    theCascadeHistory->setOutputFile();
+  }
 }
 
 MyG4IntraNucleiCascader::~MyG4IntraNucleiCascader() {
@@ -204,9 +206,13 @@ void MyG4IntraNucleiCascader::setVerboseLevel(G4int verbose) {
 
   // Optional functionality
   if (theClusterMaker) theClusterMaker->setVerboseLevel(verbose);
-  if (theCascadeHistory) theCascadeHistory->setVerboseLevel(verbose);
-}
 
+  //if (theCascadeHistory) theCascadeHistory->setVerboseLevel(verbose);
+  if (theCascadeHistory) {
+    theCascadeHistory->setVerboseLevel(verbose);
+    //theCascadeHistory->setOutputFile();
+  }
+}
 
 
 void MyG4IntraNucleiCascader::collide(G4InuclParticle* bullet,
@@ -224,7 +230,8 @@ void MyG4IntraNucleiCascader::collide(G4InuclParticle* bullet,
   } while (!finishCascade() && itry<itry_max);
 
   // Report full structure of final cascade if requested
-  if (theCascadeHistory) theCascadeHistory->Print(G4cout);
+  if (theCascadeHistory)
+    theCascadeHistory->Print(G4cout);
 
   finalize(itry, bullet, target, globalOutput);
 }
@@ -322,7 +329,10 @@ void MyG4IntraNucleiCascader::newCascade(G4int itry) {
   theExitonConfiguration.clear();
   cascad_particles.clear();             // List of initial secondaries
 
-  if (theCascadeHistory) theCascadeHistory->Clear();
+  if (theCascadeHistory){
+    theCascadeHistory->Clear();
+    theCascadeHistory->PrintLineBreak();
+  }
 }
 
 
@@ -384,7 +394,8 @@ void MyG4IntraNucleiCascader::generateCascade() {
 
     // Record incident particle first, to get history ID
     if (theCascadeHistory) {
-      theCascadeHistory->AddEntry(cascad_particles.back());
+      G4int id = theCascadeHistory->AddEntry(cascad_particles.back());
+      theCascadeHistory->PrintParticleNTuple(G4cerr,cascad_particles.back(),id,-9);
       if (verboseLevel > 2) {
         G4cout << " active cparticle got history ID "
                << cascad_particles.back().getHistoryId() << G4endl;
@@ -407,8 +418,10 @@ void MyG4IntraNucleiCascader::generateCascade() {
                                 new_cascad_particles);
 
     // Record interaction for later reporting (if desired)
-    if (theCascadeHistory && new_cascad_particles.size()>1) 
+    if (theCascadeHistory && new_cascad_particles.size()>1) {
       theCascadeHistory->AddVertex(cascad_particles.back(), new_cascad_particles);
+      //<--theCascadeHistory->PrintParticleNTuple(G4cout, new_cascad_particles.back() ); // -- not needed for now
+    }
 
     if (verboseLevel > 2) {
       G4cout << " After generate fate: New particles "

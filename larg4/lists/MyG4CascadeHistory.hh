@@ -37,12 +37,14 @@
 #ifndef MYG4CASCADE_HISTORY_HH
 #define MYG4CASCADE_HISTORY_HH
 
+//#include "MyHistoManager.hh"
+
 #include "Geant4/globals.hh"
 #include "Geant4/G4CascadParticle.hh"
 #include <iosfwd>
 #include <set>
 #include <vector>
-
+#include <fstream>
 
 class MyG4CascadeHistory {
 public:
@@ -50,6 +52,8 @@ public:
   ~MyG4CascadeHistory() {;}		// *** Do not want subclasses ***
 
   void setVerboseLevel(G4int verbose=0) { verboseLevel = verbose; }
+
+  void setOutputFile(G4String outFileName="cascade_particles.tuple");
 
   // Reset buffers for new event
   void Clear();
@@ -66,10 +70,17 @@ public:
   // Report cascade structure hierarchically
   void Print(std::ostream& os) const;
 
+  //void PrintParticleNTuple(std::ostream& outfile, const G4CascadParticle& cpart) const;
+  void PrintParticleNTuple(std::ostream& outfile, const G4CascadParticle& cpart, G4int MotherId, G4int nDaughters=0) const;
+
+  //void PrintLineBreak(std::ostream& outfile=myosstream) const;
+  void PrintLineBreak();
+
 protected:
   struct HistoryEntry {
     G4CascadParticle cpart;
     G4int n;
+    G4int m; // -- motherId
     G4int dId[10];		// Must be fixed size for allocation in vector
 
     HistoryEntry() { clear(); };
@@ -86,6 +97,7 @@ protected:
   // Add single-line report for particle, along with daughters
   void PrintEntry(std::ostream& os, G4int iEntry) const;
   void PrintParticle(std::ostream& os, const G4CascadParticle& cpart) const;
+  //void PrintParticleNTuple(std::ostream& outfile, G4CascadParticle& cpart);
   G4bool PrintingDone(G4int iEntry) const {
     return (entryPrinted.find(iEntry) != entryPrinted.end());
   }
@@ -97,6 +109,8 @@ protected:
 
 private:
   G4int verboseLevel;
+  std::ofstream outFile;
+  long pos;
 
   std::vector<HistoryEntry> theHistory;		// List of particles and daughters
   mutable std::set<G4int> entryPrinted;		// Particle indices already reported
