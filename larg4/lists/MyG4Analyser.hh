@@ -40,6 +40,7 @@
 #include "Geant4/G4InuclNuclei.hh"
 #include "Geant4/G4NuclWatcher.hh"
 //#include "G4ExitonConfiguration.hh"
+#include "Geant4/G4String.hh"
 
 #include <vector>
 #include <map>
@@ -66,7 +67,7 @@ public:
   void setInelCsec(G4double csec, G4bool withn);
   void setWatchers(const std::vector<G4NuclWatcher>& watchers);
   void try_watchers(G4int a, G4int z, G4bool if_nucl);
-  void analyse(const G4CollisionOutput& output);
+  void analyse(const G4CollisionOutput& output, const G4InuclParticle& bullet);
   void printResults();
   void printResultsSimple();
   void handleWatcherStatistics();
@@ -75,6 +76,9 @@ public:
 private: 
 
   G4int verboseLevel;
+  G4int bulletPDG;
+  G4String bulletType;
+  G4double bulletKineticEnergy;
   G4double eventNumber;
   G4double averageMultiplicity;
   G4double averageProtonNumber;

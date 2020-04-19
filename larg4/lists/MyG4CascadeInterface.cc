@@ -239,7 +239,7 @@ void MyG4CascadeInterface::SetVerboseLevel(G4int verbose) {
 
 G4bool MyG4CascadeInterface::IsApplicable(const G4HadProjectile& aTrack,
 					G4Nucleus& /* theNucleus */) {
-  return IsApplicable(aTrack.GetDefinition());  
+  return IsApplicable(aTrack.GetDefinition());
 }
 
 G4bool MyG4CascadeInterface::IsApplicable(const G4ParticleDefinition* aPD) const {
@@ -347,7 +347,8 @@ MyG4CascadeInterface::ApplyYourself(const G4HadProjectile& aTrack,
   checkFinalResult();
 
   G4cout << "Test of analyzer!" << G4endl;
-  analyzer->analyse(*output);
+  //analyzer->analyse(*output);
+  analyzer->analyse(*output,*bullet);
   analyzer->printResults();
   analyzer->printResultsNtuple();
   G4cout << "End of test of analyzer!" << G4endl;

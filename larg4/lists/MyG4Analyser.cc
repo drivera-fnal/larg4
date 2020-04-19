@@ -39,7 +39,7 @@
 #include <iomanip>
 
 MyG4Analyser::MyG4Analyser()
-  : verboseLevel(0), eventNumber(0.0), averageMultiplicity(0.0),
+  : verboseLevel(0), bulletPDG(0), bulletType("unknown"), bulletKineticEnergy(0.0), eventNumber(0.0), averageMultiplicity(0.0),
     averageProtonNumber(0.0), averageNeutronNumber(0.0),
     averagePionNumber(0.0), averagePhotonNumber(0.0),
     averageNucleonKinEnergy(0.0), averageProtonKinEnergy(0.0),
@@ -104,11 +104,15 @@ void MyG4Analyser::try_watchers(G4int a, G4int z, G4bool if_nucl) {
 }
 
 
-void MyG4Analyser::analyse(const G4CollisionOutput& output) {
+void MyG4Analyser::analyse(const G4CollisionOutput& output, const G4InuclParticle& bullet) {
 
   if (verboseLevel > 3) {
     G4cout << " >>> MyG4Analyser::analyse" << G4endl;
   }
+
+  bulletKineticEnergy = bullet.getKineticEnergy();
+  bulletType = bullet.getDefinition()->GetParticleName();
+  bulletPDG  = bullet.getDefinition()->GetPDGEncoding();
 
   if (withNuclei) {
     const std::vector<G4InuclNuclei>& nucleus = output.getOutgoingNuclei();
@@ -272,6 +276,8 @@ void MyG4Analyser::printResults() {
   }
 
   G4cout << " Number of events " << G4int(eventNumber + 0.1) << G4endl
+         << " incident particle type " << bulletType << " [" << bulletPDG << "]" <<  G4endl
+         << " incident particle kinetic energy " << bulletKineticEnergy << G4endl
          << " average multiplicity " << averageMultiplicity / eventNumber << G4endl
          << " average proton number " << averageProtonNumber / eventNumber << G4endl
          << " average neutron number " << averageNeutronNumber / eventNumber << G4endl
@@ -379,6 +385,8 @@ void MyG4Analyser::printResultsNtuple() {
   // Create one line of ASCII data. 
   // Several runs should create ntuple for data-analysis 
   G4cout <<
+    std::setw(15) << bulletPDG <<
+    std::setw(15) << bulletKineticEnergy <<
     std::setw(15) << int(eventNumber + 0.1) <<
     std::setw(15) << averageMultiplicity / eventNumber << 
     std::setw(15) << averageProtonNumber / eventNumber <<
