@@ -77,6 +77,7 @@
 
 //-- test
 #include "MyG4Analyser.hh"
+#include "MyG4Analyser2.hh"
 
 #include <vector>
 
@@ -182,6 +183,7 @@ private:
 
   G4CollisionOutput* output;
   MyG4Analyser* analyzer;
+  MyG4Analyser2* analyzer2;
 
   G4InuclElementaryParticle hadronBullet;	// Buffers for bullet, target
   G4InuclNuclei             nucleusBullet;

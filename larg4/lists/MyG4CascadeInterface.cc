@@ -153,7 +153,7 @@ MyG4CascadeInterface::MyG4CascadeInterface(const G4String& name)
     maximumTries(20), numberOfTries(0),
     collider(new MyG4InuclCollider), balance(new G4CascadeCheckBalance(name)),
     //<--bullet(0), target(0), output(new G4CollisionOutput) {
-    bullet(0), target(0), output(new G4CollisionOutput), analyzer(new MyG4Analyser) {
+    bullet(0), target(0), output(new G4CollisionOutput), analyzer(new MyG4Analyser), analyzer2(new MyG4Analyser2) {
   // Set up global objects for master thread or sequential build
   if (G4Threading::IsMasterThread()) Initialize();
 
@@ -176,6 +176,7 @@ MyG4CascadeInterface::~MyG4CascadeInterface() {
   delete balance; balance=0;
   delete output; output=0;
   delete analyzer; analyzer=0;
+  delete analyzer2; analyzer2=0;
 }
 
 void MyG4CascadeInterface::ModelDescription(std::ostream& outFile) const
@@ -348,6 +349,8 @@ MyG4CascadeInterface::ApplyYourself(const G4HadProjectile& aTrack,
 
   G4cout << "Test of analyzer!" << G4endl;
   //analyzer->analyse(*output);
+  analyzer2->analyse(*output,*bullet);
+
   analyzer->analyse(*output,*bullet);
   analyzer->printResults();
   analyzer->printResultsNtuple();
@@ -358,6 +361,7 @@ MyG4CascadeInterface::ApplyYourself(const G4HadProjectile& aTrack,
 
   G4int nSec = theParticleChange.GetNumberOfSecondaries();
   G4cout << "Number of secondaries = " << nSec << G4endl;
+  /*
   for (G4int i = 0; i < nSec; i++) {
     G4HadSecondary* sec = theParticleChange.GetSecondary(i);
     G4DynamicParticle* dp = sec->GetParticle();
@@ -365,6 +369,7 @@ MyG4CascadeInterface::ApplyYourself(const G4HadProjectile& aTrack,
       G4cout << dp->GetDefinition()->GetParticleName() << " has "
              << dp->GetKineticEnergy()/MeV << " MeV " << G4endl;
   }
+  */
 
   return &theParticleChange;
 }
@@ -592,7 +597,7 @@ void MyG4CascadeInterface::copyOutputToHadronicResult() {
   theParticleChange.SetEnergyChange(0.);
 
   // Get outcoming particles
-  if (!particles.empty()) { 
+  if (!particles.empty()) {
     particleIterator ipart = particles.begin();
     for (; ipart != particles.end(); ipart++) {
       theParticleChange.AddSecondary(makeDynamicParticle(*ipart));
@@ -603,7 +608,7 @@ void MyG4CascadeInterface::copyOutputToHadronicResult() {
   if (!outgoingNuclei.empty()) { 
     nucleiIterator ifrag = outgoingNuclei.begin();
     for (; ifrag != outgoingNuclei.end(); ifrag++) {
-      theParticleChange.AddSecondary(makeDynamicParticle(*ifrag)); 
+      theParticleChange.AddSecondary(makeDynamicParticle(*ifrag));
     }
   }
 }
