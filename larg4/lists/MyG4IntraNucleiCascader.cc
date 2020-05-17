@@ -184,7 +184,7 @@ MyG4IntraNucleiCascader::MyG4IntraNucleiCascader()
 
   if (G4CascadeParameters::showHistory()){
     theCascadeHistory = new MyG4CascadeHistory;
-    theCascadeHistory->setOutputFile();
+    theCascadeHistory->setOutputFile("cascade_particles.tuple");
   }
 }
 
@@ -379,7 +379,7 @@ void MyG4IntraNucleiCascader::setupCascade() {
 // Generate one possible cascade (all secondaries, etc.)
 
 void MyG4IntraNucleiCascader::generateCascade() {
-  if (verboseLevel>1) G4cout << " >>> MyG4IntraNucleiCascade::generateCascade " << G4endl;
+  if (verboseLevel>1) G4cout << " >>> MyG4IntraNucleiCascader::generateCascade " << G4endl;
 
   /* Loop checking 08.06.2015 MHK */
   G4int iloop = 0;
@@ -394,8 +394,8 @@ void MyG4IntraNucleiCascader::generateCascade() {
 
     // Record incident particle first, to get history ID
     if (theCascadeHistory) {
-      G4int id = theCascadeHistory->AddEntry(cascad_particles.back());
-      theCascadeHistory->PrintParticleNTuple(G4cerr,cascad_particles.back(),id,-9);
+      //<--G4int id = theCascadeHistory->AddEntry(cascad_particles.back());
+      //<--theCascadeHistory->PrintParticleNTuple(G4cerr,cascad_particles.back(),id,-9);
       if (verboseLevel > 2) {
         G4cout << " active cparticle got history ID "
                << cascad_particles.back().getHistoryId() << G4endl;
