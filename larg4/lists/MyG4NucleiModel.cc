@@ -160,6 +160,7 @@
 // 20150622  M. Kelsey -- Use G4AutoDelete for _TLS_ buffers.
 // 20200329  D. Rivera -- Copy based on:
 //    geant4.10.03.p03/source/processes/hadronic/models/cascade/cascade/src/G4NucleiModel.cc
+// 20200516  D. Rivera -- If particle is geneneration 2 or higher update the model to INCascader
 
 #include "MyG4NucleiModel.hh"
 #include "MyG4ElementaryParticleCollider.hh"
@@ -964,6 +965,7 @@ generateParticleFate(G4CascadParticle& cparticle,
     G4int nextGen = cparticle.getGeneration()+1;
     for (G4int ip = 0; ip < G4int(outgoing_particles.size()); ip++)
     {
+      if (nextGen > 1 ) outgoing_particles[ip].setModel(G4InuclParticle::INCascader); // -- D.R. update model
       outgoing_cparticles.push_back(G4CascadParticle(outgoing_particles[ip],
 						     new_position, zone,
 						     0.0, nextGen));
