@@ -962,7 +962,8 @@ generateParticleFate(G4CascadParticle& cparticle,
     
     // NOTE:  Embedded temporary is optimized away (no copying gets done)
     G4int nextGen = cparticle.getGeneration()+1;
-    for (G4int ip = 0; ip < G4int(outgoing_particles.size()); ip++) { 
+    for (G4int ip = 0; ip < G4int(outgoing_particles.size()); ip++)
+    {
       outgoing_cparticles.push_back(G4CascadParticle(outgoing_particles[ip],
 						     new_position, zone,
 						     0.0, nextGen));

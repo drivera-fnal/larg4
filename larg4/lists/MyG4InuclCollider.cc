@@ -173,7 +173,7 @@ void MyG4InuclCollider::collide(G4InuclParticle* bullet, G4InuclParticle* target
   G4int btype = 0;
   G4int ab = 0;
   G4int zb = 0;
-  // -- retrive G4InuclParticle::Model
+  // -- retreive G4InuclParticle::Model
   G4InuclParticle::Model mod = interCase.getBullet()->getModel();
   
   if (interCase.hadNucleus()) { 	// particle with nuclei
