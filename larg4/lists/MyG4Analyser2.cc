@@ -434,13 +434,24 @@ void MyG4Analyser2::printParticleNtuple(std::ostream& outfile, const G4InuclElem
     G4cout << " >>> MyG4Analyser2::printParticleNtuple" << G4endl;
   }
 
+  // -- reconstruct the generation based on the model
+  int Gen, modl = particle.getModel();
+  if (modl < 2) Gen = 0; // -- Default(0), bullet(1), or target(1)
+  else if (modl == 3) Gen = 1; // -- EPCollider(3)
+  else Gen = 2; // -- INCascader(4) or above, the true generation is lost at this point, but I've
+                //    attemped to fix the over-use of EPCollider model (vs. the INCascader) within
+                //    MyG4NucleiModel by re-classifying all EPCollider secondaries with generation
+                //    > 1 as INCascader particles. This will only affect the Generation value for
+                //    G4CascadParticles. Generation of models > 3 default to 2, but are not really
+                //    accurate.
+
   // Create one line of ASCII data.
   outfile <<
     std::setw(5)  << particle.getDefinition()->GetPDGEncoding() <<  /*PDG*/
     std::setw(5)  << particle.getModel() <<                         /*Modl*/
     std::setw(5)  << Id <<                                          /*Id*/
     std::setw(5)  << 0 <<                                           /*MId*/
-    std::setw(5)  << eventNumber <<                                 /*Gen*/
+    std::setw(5)  << Gen <<                                         /*Gen*/
     std::setw(5)  << nDaughters <<                                  /*Daug*/
     std::setw(5)  << 3 <<                                           /*Zone*/
     std::setw(5)  << 0 <<                                           /*In*/
@@ -461,12 +472,13 @@ void MyG4Analyser2::printBulletNtuple(std::ostream& outfile, const G4InuclPartic
   }
 
   // Create one line of ASCII data.
+  // all bullet particles are considered Generation 0
   outfile <<
     std::setw(5)  << particle.getDefinition()->GetPDGEncoding() <<  /*PDG*/
     std::setw(5)  << particle.getModel() <<                         /*Modl*/
     std::setw(5)  << Id <<                                          /*Id*/
     std::setw(5)  << -1 <<                                          /*MId*/
-    std::setw(5)  << eventNumber <<                                 /*Gen*/
+    std::setw(5)  << 0 <<                                           /*Gen*/
     std::setw(5)  << nDaughters <<                                  /*Daug*/
     std::setw(5)  << 3 <<                                           /*Zone*/
     std::setw(5)  << 0 <<                                           /*In*/
