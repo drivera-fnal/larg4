@@ -53,7 +53,7 @@ public:
 
   void setVerboseLevel(G4int verbose=0) { verboseLevel = verbose; }
 
-  void setOutputFile(G4String outFileName="cascade_particles.tuple");
+  void setOutputFile(G4String outFileName);
 
   // Reset buffers for new event
   void Clear();

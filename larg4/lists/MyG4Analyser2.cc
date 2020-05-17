@@ -39,7 +39,8 @@
 #include <iomanip>
 
 MyG4Analyser2::MyG4Analyser2()
-  : verboseLevel(0), bulletPDG(0), bulletType("unknown"), bulletKineticEnergy(0.0), eventNumber(0.0), Multiplicity(0.0),
+  : verboseLevel(0), outputSet(false), bulletPDG(0), bulletType("unknown"),
+    bulletKineticEnergy(0.0), eventNumber(0.0), Multiplicity(0.0),
     ProtonNumber(0.0), NeutronNumber(0.0),
     PionNumber(0.0), PhotonNumber(0.0),
     NucleonKinEnergy(0.0), ProtonKinEnergy(0.0),
@@ -56,6 +57,56 @@ MyG4Analyser2::MyG4Analyser2()
     modelCounterMap.emplace(i,std::make_pair(model, 0));
     G4cout << "Entry " << i << " : " << model << G4endl;
   }
+}
+
+void MyG4Analyser2::setOutputFile(G4String outFileName) {
+  outFile.open(outFileName, std::ios::out | std::ios::app );
+  outputSet = true;
+
+  G4cerr << "INSIDE setOutputFile! " << G4endl;
+  pos = outFile.tellp(); // -- position in the stream
+  G4cerr << "File is open: " << outFile.is_open() << " Position : " << pos << G4endl;
+
+  // -- Header
+  if (pos==0)
+  {
+    G4cerr << "INSIDE setOutputFile if loop!" << G4endl;
+    outFile << "# PDG"
+            << " Modl"
+            << "   Id"
+            << "  MId"
+            << "  Gen"
+            << " Daug"
+            << " Zone"
+            << "   In"
+            << "             KE"
+            << "              E"
+            << "             Px"
+            << "             Py"
+            << "             Pz"
+            << "             Vx"
+            << "             Vy"
+            << "             Vz"
+            << std::endl;
+    pos = outFile.tellp();
+  }
+  G4cerr << "File is open: " << outFile.is_open() << " Position : " << pos << G4endl;
+}
+
+void MyG4Analyser2::
+printLineBreak() {
+
+  std::streambuf *psbuf, *backup;
+
+  backup = std::cout.rdbuf(); // -- back up cout's streambuf
+
+  psbuf = outFile.rdbuf();    // -- get file's streambuf
+  std::cout.rdbuf(psbuf);     // -- assign streambuf to cout
+
+  std::cout << std::setfill('#') << std::setw(160) << '#' << std::endl; // -- written to the file
+
+  std::cout.rdbuf(backup);    // -- restore cout's original streambuf
+
 }
 
 void MyG4Analyser2::setInelCsec(G4double csec, G4bool withn) {
@@ -143,6 +194,9 @@ void MyG4Analyser2::analyse(const G4CollisionOutput& output, const G4InuclPartic
         output.getOutgoingParticles();
       Multiplicity += particles.size();
 
+      // -- Add entry for primary bullet particle  (ostream, partile, mId, nDaughters
+      if (outputSet) printBulletNtuple(outFile, bullet, 0, particles.size());
+
       // -- loop over all outgoing particles
       for (G4int i = 0; i < G4int(particles.size()); i++) {
         G4int ap = 0;
@@ -150,7 +204,7 @@ void MyG4Analyser2::analyse(const G4CollisionOutput& output, const G4InuclPartic
         G4InuclParticle::Model model = particles[i].getModel();
         G4int modelId = (G4int)model;
         modelCounterMap[modelId].second +=1;
-        printParticleNtuple(G4cerr, particles[i], i, 0);
+        if (outputSet) printParticleNtuple(outFile, particles[i], (i+1), 0);
 
         if (particles[i].nucleon()) { // -- is a nucleon
           NucleonKinEnergy += particles[i].getKineticEnergy();
@@ -375,50 +429,55 @@ void MyG4Analyser2::handleWatcherStatistics() {
   }
 }
 
-void MyG4Analyser2::printParticleNtuple(std::ostream& outfile, const G4InuclElementaryParticle &particle, G4int MotherId=-9, G4int nDaughters=0) const {
+void MyG4Analyser2::printParticleNtuple(std::ostream& outfile, const G4InuclElementaryParticle &particle, G4int Id=-9, G4int nDaughters=-1) const {
   if (verboseLevel > 3) {
     G4cout << " >>> MyG4Analyser2::printParticleNtuple" << G4endl;
   }
 
-  /*
-  // Create one line of ASCII data. 
-  // Several runs should create ntuple for data-analysis 
-  G4cout <<
-    std::setw(15) << bulletPDG <<
-    std::setw(15) << bulletKineticEnergy <<
-    std::setw(15) << int(eventNumber+0.01) <<
-    std::setw(15) << Multiplicity << 
-    std::setw(15) << ProtonNumber <<
-    std::setw(15) << NeutronNumber << " " <<
-    std::setw(15) << NucleonKinEnergy << " " <<
-    std::setw(15) << ProtonKinEnergy << " " <<
-    std::setw(15) << NeutronKinEnergy << " " <<
-    std::setw(15) << PionNumber << " " <<
-    std::setw(15) << PionKinEnergy << " " <<
-    std::setw(15) << PhotonNumber << " " <<
-    std::setw(15) << PhotonKinEnergy << G4endl;
-  */
-  //auto particle = cpart.getParticle();
-
+  // Create one line of ASCII data.
   outfile <<
-    std::setw(15) << particle.getDefinition()->GetPDGEncoding() <<
-    std::setw(5)  << particle.getModel() <<
-    //std::setw(5)  << cpart.getHistoryId() <<
-    std::setw(5)  << eventNumber <<
-    std::setw(5)  << MotherId <<
-    //std::setw(5)  << cpart.getGeneration() <<
-    std::setw(5)  << -1 <<
-    std::setw(5)  << nDaughters <<
-    std::setw(15) << particle.getKineticEnergy()
-    /*
-    std::setw(15) << (cpart.getPosition())[0] <<
-    std::setw(15) << (cpart.getPosition())[1] <<
-    std::setw(15) << (cpart.getPosition())[2] <<
-    std::setw(15) << (cpart.getMomentum())[0] <<
-    std::setw(15) << (cpart.getMomentum())[1] <<
-    std::setw(15) << (cpart.getMomentum())[2] <<
-    std::setw(15) << (cpart.getMomentum())[3]
-    */
+    std::setw(5)  << particle.getDefinition()->GetPDGEncoding() <<  /*PDG*/
+    std::setw(5)  << particle.getModel() <<                         /*Modl*/
+    std::setw(5)  << Id <<                                          /*Id*/
+    std::setw(5)  << 0 <<                                           /*MId*/
+    std::setw(5)  << eventNumber <<                                 /*Gen*/
+    std::setw(5)  << nDaughters <<                                  /*Daug*/
+    std::setw(5)  << 3 <<                                           /*Zone*/
+    std::setw(5)  << 0 <<                                           /*In*/
+    std::setw(15) << particle.getKineticEnergy() <<                 /*KE*/
+    std::setw(15) << (particle.getMomentum())[3] <<                 /*E*/
+    std::setw(15) << (particle.getMomentum())[0] <<                 /*Px*/
+    std::setw(15) << (particle.getMomentum())[1] <<                 /*Py*/
+    std::setw(15) << (particle.getMomentum())[2] <<                 /*Pz*/
+    std::setw(15) << -99. <<                                        /*Vx*/
+    std::setw(15) << -99. <<                                        /*Vy*/
+    std::setw(15) << -99.                                           /*Vz*/
+    << std::endl;
+}
+
+void MyG4Analyser2::printBulletNtuple(std::ostream& outfile, const G4InuclParticle &particle, G4int Id=-9, G4int nDaughters=-1) const {
+  if (verboseLevel > 3) {
+    G4cout << " >>> MyG4Analyser2::printBulletNtuple" << G4endl;
+  }
+
+  // Create one line of ASCII data.
+  outfile <<
+    std::setw(5)  << particle.getDefinition()->GetPDGEncoding() <<  /*PDG*/
+    std::setw(5)  << particle.getModel() <<                         /*Modl*/
+    std::setw(5)  << Id <<                                          /*Id*/
+    std::setw(5)  << -1 <<                                          /*MId*/
+    std::setw(5)  << eventNumber <<                                 /*Gen*/
+    std::setw(5)  << nDaughters <<                                  /*Daug*/
+    std::setw(5)  << 3 <<                                           /*Zone*/
+    std::setw(5)  << 0 <<                                           /*In*/
+    std::setw(15) << particle.getKineticEnergy() <<                 /*KE*/
+    std::setw(15) << (particle.getMomentum())[3] <<                 /*E*/
+    std::setw(15) << (particle.getMomentum())[0] <<                 /*Px*/
+    std::setw(15) << (particle.getMomentum())[1] <<                 /*Py*/
+    std::setw(15) << (particle.getMomentum())[2] <<                 /*Pz*/
+    std::setw(15) << -99. <<                                        /*Vx*/
+    std::setw(15) << -99. <<                                        /*Vy*/
+    std::setw(15) << -99.                                           /*Vz*/
     << std::endl;
 }
 

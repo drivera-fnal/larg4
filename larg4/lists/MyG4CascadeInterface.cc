@@ -168,6 +168,11 @@ MyG4CascadeInterface::MyG4CascadeInterface(const G4String& name)
     useCascadeDeexcitation();
     G4cout << "Using CascadeDeexcitation!!" << G4endl;;
   }
+
+  // -- Test
+  if (analyzer2!=NULL){
+    analyzer2->setOutputFile("outgoing_particles.tuple");
+  }
 }
 
 MyG4CascadeInterface::~MyG4CascadeInterface() {
@@ -338,23 +343,19 @@ MyG4CascadeInterface::ApplyYourself(const G4HadProjectile& aTrack,
   // Rotate event to put Z axis along original projectile direction
   output->rotateEvent(bulletInLabFrame);
 
-  // -- test!
-  //<--G4cout << "Test of analyzer!" << G4endl;
-  //<---analyzer->analyse(*output);
-
   copyOutputToHadronicResult();
 
   // Report violations of conservation laws in original frame
   checkFinalResult();
 
-  G4cout << "Test of analyzer!" << G4endl;
-  //analyzer->analyse(*output);
-  analyzer2->analyse(*output,*bullet);
-
+  G4cout << "Test of analyzers!" << G4endl;
   analyzer->analyse(*output,*bullet);
   analyzer->printResults();
   analyzer->printResultsNtuple();
-  G4cout << "End of test of analyzer!" << G4endl;
+
+  analyzer2->analyse(*output,*bullet);
+  analyzer2->printLineBreak();
+  G4cout << "End of test of analyzers!" << G4endl;
 
   // Clean up and return final result;
   clear();
@@ -473,7 +474,6 @@ G4bool MyG4CascadeInterface::createBullet(const G4HadProjectile& aTrack) {
   G4int bulletType = 0;			// For elementary particles
   G4int bulletA = 0, bulletZ = 0;	// For nucleus projectile
   // -- D.R. attempt to book-keep the model for all particles
-  //G4InuclParticle::Model bulletM = G4InuclParticle::bullet;
 
   if (trkDef->GetAtomicMass() <= 1) {
     bulletType = G4InuclElementaryParticle::type(trkDef);
@@ -504,10 +504,10 @@ G4bool MyG4CascadeInterface::createBullet(const G4HadProjectile& aTrack) {
 				 projectileMomentum.e());
   
   if (G4InuclElementaryParticle::valid(bulletType)) {
-    hadronBullet.fill(momentumBullet, bulletType, G4InuclParticle::bullet);
+    hadronBullet.fill(momentumBullet, bulletType, G4InuclParticle::bullet); // -- book-keep model
     bullet = &hadronBullet;
   } else {
-    nucleusBullet.fill(momentumBullet, bulletA, bulletZ, 0., G4InuclParticle::bullet);
+    nucleusBullet.fill(momentumBullet, bulletA, bulletZ, 0., G4InuclParticle::bullet); // -- book-keep model
     bullet = &nucleusBullet;
   }
 
@@ -529,13 +529,12 @@ G4bool MyG4CascadeInterface::createTarget(G4V3DNucleus* theNucleus) {
 
 G4bool MyG4CascadeInterface::createTarget(G4int A, G4int Z) {
   // -- D.R. attempt to book-keep the model for all particles
-  //G4InuclParticle::Model targetM = G4InuclParticle::target;
 
   if (A > 1) {
-    nucleusTarget.fill(A, Z, 0., G4InuclParticle::target);
+    nucleusTarget.fill(A, Z, 0., G4InuclParticle::target); // -- book-keep model
     target = &nucleusTarget;
   } else {
-    hadronTarget.fill(0., (Z==1?proton:neutron), G4InuclParticle::target);
+    hadronTarget.fill(0., (Z==1?proton:neutron), G4InuclParticle::target); // -- book-keep model
     target = &hadronTarget;
   }
 

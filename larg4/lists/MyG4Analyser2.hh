@@ -26,8 +26,7 @@
 // $Id: MyG4Analyser.hh 66241 2012-12-13 18:34:42Z gunter $
 //
 // 20101010  M. Kelsey -- Migrate to integer A and Z
-// 20191209  D. Rivera -- Copy based on:
-//    geant4.10.03.p03/source/processes/hadronic/models/cascade/cascade/include/G4Analyser.hh
+// 20191209  D. Rivera -- Created to store outgoing particle info at each reaction
 
 #ifndef MYG4ANALYSER2_HH
 #define MYG4ANALYSER2_HH
@@ -64,6 +63,8 @@ const std::map<G4int,std::string> modelMap = {
 public:
 
   MyG4Analyser2();
+  void setOutputFile(G4String outFileName);
+  void printLineBreak();
   void setInelCsec(G4double csec, G4bool withn);
   void setWatchers(const std::vector<G4NuclWatcher>& watchers);
   void try_watchers(G4int a, G4int z, G4bool if_nucl);
@@ -71,12 +72,17 @@ public:
   void printResults();
   void printResultsSimple();
   void handleWatcherStatistics();
-  void printParticleNtuple(std::ostream& outfile, const G4InuclElementaryParticle &particle, G4int MotherId, G4int nDaughters) const;
+  void printBulletNtuple(std::ostream& outfile, const G4InuclParticle &particle, G4int Id, G4int nDaughters) const;
+  void printParticleNtuple(std::ostream& outfile, const G4InuclElementaryParticle &particle, G4int Id, G4int nDaughters) const;
   void printResultsNtuple();
 
 private: 
 
   G4int verboseLevel;
+  std::ofstream outFile;
+  G4bool outputSet;
+  G4int pos;
+
   G4int bulletPDG;
   G4String bulletType;
   G4double bulletKineticEnergy;

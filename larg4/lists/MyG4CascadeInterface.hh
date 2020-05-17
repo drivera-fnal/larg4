@@ -59,7 +59,7 @@
 // 20140116  M. Kelsey -- Move statics to const data members to avoid weird
 //		interactions with MT.
 // 20191209  D. Rivera -- copy based on:
-//    geant4.10.03.p03/source/processes/hadronic/models/cascade/cascade/src/G4CascadeHistory.cc
+//    geant4.10.03.p03/source/processes/hadronic/models/cascade/cascade/src/G4CascadeInterface.hh
 
 #ifndef MYG4CASCADEINTERFACE_H
 #define MYG4CASCADEINTERFACE_H 1

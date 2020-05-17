@@ -57,20 +57,22 @@ void MyG4CascadeHistory::setOutputFile(G4String outFileName) {
   if (pos==0)
   {
     G4cerr << "INSIDE setOutputFile if loop!" << G4endl;
-    outFile << "#           PDG"
+    outFile << "# PDG"
             << " Modl"
             << "   Id"
             << "  MId"
             << "  Gen"
             << " Daug"
+            << " Zone"
+            << "   In"
             << "             KE"
-            << "             Vx"
-            << "             Vy"
-            << "             Vz"
+            << "              E"
             << "             Px"
             << "             Py"
             << "             Pz"
-            << "              E"
+            << "             Vx"
+            << "             Vy"
+            << "             Vz"
             << std::endl;
     pos = outFile.tellp();
   }
@@ -231,20 +233,22 @@ PrintParticleNTuple(std::ostream& outfile, const G4CascadParticle& cpart, G4int 
 
   auto particle = cpart.getParticle();
   outfile <<
-    std::setw(15) << particle.getDefinition()->GetPDGEncoding() <<
+    std::setw(5)  << particle.getDefinition()->GetPDGEncoding() <<
     std::setw(5)  << particle.getModel() <<
     std::setw(5)  << cpart.getHistoryId() <<
     std::setw(5)  << MotherId <<
     std::setw(5)  << cpart.getGeneration() <<
     std::setw(5)  << nDaughters <<
+    std::setw(5)  << cpart.getCurrentZone() <<
+    std::setw(5)  << (cpart.movingInsideNuclei() ? 1 : 0) <<
     std::setw(15) << particle.getKineticEnergy() <<
-    std::setw(15) << (cpart.getPosition())[0] <<
-    std::setw(15) << (cpart.getPosition())[1] <<
-    std::setw(15) << (cpart.getPosition())[2] <<
+    std::setw(15) << (cpart.getMomentum())[3] <<
     std::setw(15) << (cpart.getMomentum())[0] <<
     std::setw(15) << (cpart.getMomentum())[1] <<
     std::setw(15) << (cpart.getMomentum())[2] <<
-    std::setw(15) << (cpart.getMomentum())[3]
+    std::setw(15) << (cpart.getPosition())[0] <<
+    std::setw(15) << (cpart.getPosition())[1] <<
+    std::setw(15) << (cpart.getPosition())[2]
     << std::endl;
 }
 
