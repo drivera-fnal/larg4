@@ -72,8 +72,9 @@ public:
   void printResults();
   void printResultsSimple();
   void handleWatcherStatistics();
+  void printNucleiNtuple(std::ostream& outfile, const G4InuclNuclei &particle, G4int Id) const;
   void printBulletNtuple(std::ostream& outfile, const G4InuclParticle &particle, G4int Id, G4int nDaughters) const;
-  void printParticleNtuple(std::ostream& outfile, const G4InuclElementaryParticle &particle, G4int Id, G4int nDaughters) const;
+  void printParticleNtuple(std::ostream& outfile, const G4InuclElementaryParticle &particle, G4int Id) const;
   void printResultsNtuple();
 
 private: 

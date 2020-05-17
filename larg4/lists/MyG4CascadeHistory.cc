@@ -57,8 +57,8 @@ void MyG4CascadeHistory::setOutputFile(G4String outFileName) {
   if (pos==0)
   {
     G4cerr << "INSIDE setOutputFile if loop!" << G4endl;
-    outFile << "# PDG"
-            << " Modl"
+    outFile << "#       PDG"
+            << " Mdl"
             << "   Id"
             << "  MId"
             << "  Gen"
@@ -233,22 +233,22 @@ PrintParticleNTuple(std::ostream& outfile, const G4CascadParticle& cpart, G4int 
 
   auto particle = cpart.getParticle();
   outfile <<
-    std::setw(5)  << particle.getDefinition()->GetPDGEncoding() <<
-    std::setw(5)  << particle.getModel() <<
-    std::setw(5)  << cpart.getHistoryId() <<
-    std::setw(5)  << MotherId <<
-    std::setw(5)  << cpart.getGeneration() <<
-    std::setw(5)  << nDaughters <<
-    std::setw(5)  << cpart.getCurrentZone() <<
-    std::setw(5)  << (cpart.movingInsideNuclei() ? 1 : 0) <<
-    std::setw(15) << particle.getKineticEnergy() <<
-    std::setw(15) << (cpart.getMomentum())[3] <<
-    std::setw(15) << (cpart.getMomentum())[0] <<
-    std::setw(15) << (cpart.getMomentum())[1] <<
-    std::setw(15) << (cpart.getMomentum())[2] <<
-    std::setw(15) << (cpart.getPosition())[0] <<
-    std::setw(15) << (cpart.getPosition())[1] <<
-    std::setw(15) << (cpart.getPosition())[2]
+    std::setw(11) << particle.getDefinition()->GetPDGEncoding() <<  /*PDG*/
+    std::setw(4)  << particle.getModel() <<                         /*Modl*/
+    std::setw(5)  << cpart.getHistoryId() <<                        /*Id*/
+    std::setw(5)  << MotherId <<                                    /*MId*/
+    std::setw(5)  << cpart.getGeneration() <<                       /*Gen*/
+    std::setw(5)  << nDaughters <<                                  /*Daug*/
+    std::setw(5)  << cpart.getCurrentZone() <<                      /*Zone*/
+    std::setw(5)  << (cpart.movingInsideNuclei() ? 1 : 0) <<        /*In*/
+    std::setw(15) << particle.getKineticEnergy() <<                 /*KE*/
+    std::setw(15) << (cpart.getMomentum())[3] <<                    /*E*/
+    std::setw(15) << (cpart.getMomentum())[0] <<                    /*Px*/
+    std::setw(15) << (cpart.getMomentum())[1] <<                    /*Py*/
+    std::setw(15) << (cpart.getMomentum())[2] <<                    /*Pz*/
+    std::setw(15) << (cpart.getPosition())[0] <<                    /*Vx*/
+    std::setw(15) << (cpart.getPosition())[1] <<                    /*Vy*/
+    std::setw(15) << (cpart.getPosition())[2]                       /*Vz*/
     << std::endl;
 }
 
@@ -262,7 +262,7 @@ PrintLineBreak() {
   psbuf = outFile.rdbuf();    // -- get file's streambuf
   std::cout.rdbuf(psbuf);     // -- assign streambuf to cout
 
-  std::cout << std::setfill('#') << std::setw(160) << '#' << std::endl; // -- written to the file
+  std::cout << std::setfill('#') << std::setw(165) << '#' << std::endl; // -- written to the file
 
   std::cout.rdbuf(backup);    // -- restore cout's original streambuf
 

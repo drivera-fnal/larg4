@@ -71,8 +71,8 @@ void MyG4Analyser2::setOutputFile(G4String outFileName) {
   if (pos==0)
   {
     G4cerr << "INSIDE setOutputFile if loop!" << G4endl;
-    outFile << "# PDG"
-            << " Modl"
+    outFile << "#       PDG"
+            << " Mdl"
             << "   Id"
             << "  MId"
             << "  Gen"
@@ -103,7 +103,7 @@ printLineBreak() {
   psbuf = outFile.rdbuf();    // -- get file's streambuf
   std::cout.rdbuf(psbuf);     // -- assign streambuf to cout
 
-  std::cout << std::setfill('#') << std::setw(160) << '#' << std::endl; // -- written to the file
+  std::cout << std::setfill('#') << std::setw(165) << '#' << std::endl; // -- written to the file
 
   std::cout.rdbuf(backup);    // -- restore cout's original streambuf
 
@@ -165,46 +165,28 @@ void MyG4Analyser2::analyse(const G4CollisionOutput& output, const G4InuclPartic
   bulletType = bullet.getDefinition()->GetParticleName();
   bulletPDG  = bullet.getDefinition()->GetPDGEncoding();
 
+  const std::vector<G4InuclElementaryParticle>& particles =
+    output.getOutgoingParticles();
+  Multiplicity += particles.size();
+
+  // -- Add entry for primary bullet particle  (ostream, partile, mId, nDaughters
+  if (outputSet) printBulletNtuple(outFile, bullet, 0, particles.size());
+
+
   if (withNuclei) { // -- include nuclei analysis
     const std::vector<G4InuclNuclei>& nuclei = output.getOutgoingNuclei();
 
     //    if (nuclei.size() >= 0) {
     if (nuclei.size() > 0) { // -- if there are no nuclei.. this gets skipped?
-      G4int nbig = 0;
-      OutgoingNuclei += nuclei.size();
 
-      for (G4int in = 0; in < G4int(nuclei.size()); in++) {
-        ExitationEnergy += nuclei[in].getExitationEnergy();
-
-        G4int a = nuclei[in].getA();
-        G4int z = nuclei[in].getZ();
-
-        if (in == 0) {  // -- why only the first entry in the nuclei vector?
-          A = a; 
-          Z = z; 
-        };
-
-        if (a > 10) nbig++;
-        try_watchers(a, z, true);
-      };
-
-      if (nbig > 1) fissy_prob += 1.0;
-      eventNumber += 1.0;
-      const std::vector<G4InuclElementaryParticle>& particles =
-        output.getOutgoingParticles();
-      Multiplicity += particles.size();
-
-      // -- Add entry for primary bullet particle  (ostream, partile, mId, nDaughters
-      if (outputSet) printBulletNtuple(outFile, bullet, 0, particles.size());
-
-      // -- loop over all outgoing particles
+      // -- process particles first
       for (G4int i = 0; i < G4int(particles.size()); i++) {
         G4int ap = 0;
         G4int zp = 0;
         G4InuclParticle::Model model = particles[i].getModel();
         G4int modelId = (G4int)model;
         modelCounterMap[modelId].second +=1;
-        if (outputSet) printParticleNtuple(outFile, particles[i], (i+1), 0);
+        if (outputSet) printParticleNtuple(outFile, particles[i], (i+1));
 
         if (particles[i].nucleon()) { // -- is a nucleon
           NucleonKinEnergy += particles[i].getKineticEnergy();
@@ -247,6 +229,40 @@ void MyG4Analyser2::analyse(const G4CollisionOutput& output, const G4InuclPartic
         }; // -- 
         try_watchers(ap, zp, false);
       };
+
+      G4int nbig = 0;
+      OutgoingNuclei += nuclei.size();
+
+      for (G4int in = 0; in < G4int(nuclei.size()); in++)
+      {
+        ExitationEnergy += nuclei[in].getExitationEnergy();
+
+        G4int a = nuclei[in].getA();
+        G4int z = nuclei[in].getZ();
+
+        if (in == 0) {  // -- why only the first entry in the nuclei vector?
+          A = a;
+          Z = z;
+        };
+
+        if (a > 10) nbig++;
+        try_watchers(a, z, true);
+
+        if (outputSet) printNucleiNtuple(outFile, nuclei[in], (in+1));
+      };
+
+      if (nbig > 1) fissy_prob += 1.0;
+      eventNumber += 1.0;
+      /*
+      const std::vector<G4InuclElementaryParticle>& particles =
+        output.getOutgoingParticles();
+      Multiplicity += particles.size();
+
+      // -- Add entry for primary bullet particle  (ostream, partile, mId, nDaughters
+      if (outputSet) printBulletNtuple(outFile, bullet, 0, particles.size());
+      */
+      // -- loop over all outgoing particles
+
     } else {
       G4cout << " >> MyG4Analyser2::analyse "
              << "withNuclei = true, but vector of outgoing nuclei is empty..." << G4endl;
@@ -254,10 +270,11 @@ void MyG4Analyser2::analyse(const G4CollisionOutput& output, const G4InuclPartic
 
   } else { // -- don't do nuclei analysis
     eventNumber += 1.0;
+    /*
     const std::vector<G4InuclElementaryParticle>& particles =
       output.getOutgoingParticles();
     Multiplicity += particles.size();
-
+    */
     for (G4int i = 0; i < G4int(particles.size()); i++) {
       G4InuclParticle::Model model = particles[i].getModel();
       G4int modelId = (G4int)model;
@@ -429,7 +446,7 @@ void MyG4Analyser2::handleWatcherStatistics() {
   }
 }
 
-void MyG4Analyser2::printParticleNtuple(std::ostream& outfile, const G4InuclElementaryParticle &particle, G4int Id=-9, G4int nDaughters=-1) const {
+void MyG4Analyser2::printParticleNtuple(std::ostream& outfile, const G4InuclElementaryParticle &particle, G4int Id=-9) const {
   if (verboseLevel > 3) {
     G4cout << " >>> MyG4Analyser2::printParticleNtuple" << G4endl;
   }
@@ -447,12 +464,12 @@ void MyG4Analyser2::printParticleNtuple(std::ostream& outfile, const G4InuclElem
 
   // Create one line of ASCII data.
   outfile <<
-    std::setw(5)  << particle.getDefinition()->GetPDGEncoding() <<  /*PDG*/
-    std::setw(5)  << particle.getModel() <<                         /*Modl*/
+    std::setw(11) << particle.getDefinition()->GetPDGEncoding() <<  /*PDG*/
+    std::setw(4)  << particle.getModel() <<                         /*Modl*/
     std::setw(5)  << Id <<                                          /*Id*/
     std::setw(5)  << 0 <<                                           /*MId*/
     std::setw(5)  << Gen <<                                         /*Gen*/
-    std::setw(5)  << nDaughters <<                                  /*Daug*/
+    std::setw(5)  << 0 <<                                           /*Daug*/
     std::setw(5)  << 3 <<                                           /*Zone*/
     std::setw(5)  << 0 <<                                           /*In*/
     std::setw(15) << particle.getKineticEnergy() <<                 /*KE*/
@@ -474,12 +491,39 @@ void MyG4Analyser2::printBulletNtuple(std::ostream& outfile, const G4InuclPartic
   // Create one line of ASCII data.
   // all bullet particles are considered Generation 0
   outfile <<
-    std::setw(5)  << particle.getDefinition()->GetPDGEncoding() <<  /*PDG*/
-    std::setw(5)  << particle.getModel() <<                         /*Modl*/
+    std::setw(11) << particle.getDefinition()->GetPDGEncoding() <<  /*PDG*/
+    std::setw(4)  << particle.getModel() <<                         /*Modl*/
     std::setw(5)  << Id <<                                          /*Id*/
     std::setw(5)  << -1 <<                                          /*MId*/
     std::setw(5)  << 0 <<                                           /*Gen*/
     std::setw(5)  << nDaughters <<                                  /*Daug*/
+    std::setw(5)  << 3 <<                                           /*Zone*/
+    std::setw(5)  << 0 <<                                           /*In*/
+    std::setw(15) << particle.getKineticEnergy() <<                 /*KE*/
+    std::setw(15) << (particle.getMomentum())[3] <<                 /*E*/
+    std::setw(15) << (particle.getMomentum())[0] <<                 /*Px*/
+    std::setw(15) << (particle.getMomentum())[1] <<                 /*Py*/
+    std::setw(15) << (particle.getMomentum())[2] <<                 /*Pz*/
+    std::setw(15) << -99. <<                                        /*Vx*/
+    std::setw(15) << -99. <<                                        /*Vy*/
+    std::setw(15) << -99.                                           /*Vz*/
+    << std::endl;
+}
+
+void MyG4Analyser2::printNucleiNtuple(std::ostream& outfile, const G4InuclNuclei &particle, G4int Id=-9) const {
+  if (verboseLevel > 3) {
+    G4cout << " >>> MyG4Analyser2::printNucleiNtuple" << G4endl;
+  }
+
+  // Create one line of ASCII data.
+  // all bullet particles are considered Generation 0
+  outfile <<
+    std::setw(11) << particle.getDefinition()->GetPDGEncoding() <<  /*PDG*/
+    std::setw(4)  << particle.getModel() <<                         /*Modl*/
+    std::setw(5)  << Id <<                                          /*Id*/
+    std::setw(5)  << -1 <<                                          /*MId*/
+    std::setw(5)  << 0 <<                                           /*Gen*/
+    std::setw(5)  << 0 <<                                           /*Daug*/
     std::setw(5)  << 3 <<                                           /*Zone*/
     std::setw(5)  << 0 <<                                           /*In*/
     std::setw(15) << particle.getKineticEnergy() <<                 /*KE*/
