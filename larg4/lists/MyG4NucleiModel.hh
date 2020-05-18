@@ -29,7 +29,7 @@
 // 20100319  M. Kelsey -- Remove "using" directory and unnecessary #includes,
 //		move ctor to .cc file
 // 20100407  M. Kelsey -- Create "partners thePartners" data member to act
-//		as buffer between ::generateInteractionPartners() and 
+//		as buffer between ::generateInteractionPartners() and
 //		::generateParticleFate(), and make "outgoing_cparticles" a
 //		data member returned from the latter by const-ref.  Replace
 //		return-by-value of initializeCascad() with an input buffer.
@@ -109,7 +109,7 @@ public:
   void reset(G4int nHitNeutrons=0, G4int nHitProtons=0,
 	     const std::vector<G4ThreeVector>* hitPoints=0);
 
-  void printModel() const; 
+  void printModel() const;
 
   G4double getDensity(G4int ip, G4int izone) const {
     return nucleon_densities[ip - 1][izone];
@@ -151,8 +151,8 @@ public:
   G4int getNumberOfNeutrons() const { return neutronNumberCurrent; }
   G4int getNumberOfProtons() const  { return protonNumberCurrent; }
 
-  G4bool empty() const { 
-    return neutronNumberCurrent < 1 && protonNumberCurrent < 1; 
+  G4bool empty() const {
+    return neutronNumberCurrent < 1 && protonNumberCurrent < 1;
   }
 
   G4bool stillInside(const G4CascadParticle& cparticle) {
@@ -174,12 +174,12 @@ public:
 
   void generateParticleFate(G4CascadParticle& cparticle,
 			    MyG4ElementaryParticleCollider* theEPCollider,
-			    std::vector<G4CascadParticle>& cascade); 
+			    std::vector<G4CascadParticle>& cascade);
 
   G4bool forceFirst(const G4CascadParticle& cparticle) const;
   G4bool isProjectile(const G4CascadParticle& cparticle) const;
-  G4bool worthToPropagate(const G4CascadParticle& cparticle) const; 
-    
+  G4bool worthToPropagate(const G4CascadParticle& cparticle) const;
+
   G4InuclElementaryParticle generateNucleon(G4int type, G4int zone) const;
 
   G4LorentzVector generateNucleonMomentum(G4int type, G4int zone) const;
@@ -191,7 +191,7 @@ public:
   static G4bool useQuasiDeuteron(G4int ptype, G4int qdtype=0);
 
 protected:
-  G4bool passFermi(const std::vector<G4InuclElementaryParticle>& particles, 
+  G4bool passFermi(const std::vector<G4InuclElementaryParticle>& particles,
 		   G4int zone);
 
   G4bool passTrailing(const G4ThreeVector& hit_position);
@@ -200,7 +200,7 @@ protected:
 
   void choosePointAlongTraj(G4CascadParticle& cparticle);
 
-  G4InuclElementaryParticle generateQuasiDeuteron(G4int type1, 
+  G4InuclElementaryParticle generateQuasiDeuteron(G4int type1,
 						  G4int type2,
 						  G4int zone) const;
 
@@ -227,7 +227,7 @@ protected:
 				  G4double nuclearRadius) const;
 
   G4double zoneIntegralGaussian(G4double ur1, G4double ur2,
-				G4double nuclearRadius) const; 
+				G4double nuclearRadius) const;
 
   G4double getRatio(G4int ip) const;	// Fraction of nucleons still available
 
@@ -254,7 +254,7 @@ private:
 
   std::vector<G4InuclElementaryParticle> qdeutrons;	// For h+(NN) trials
   std::vector<G4double> acsecs;
-    
+
   std::vector<G4ThreeVector> coordinates;	// for initializeCascad()
   std::vector<G4LorentzVector> momentums;
   std::vector<G4InuclElementaryParticle> raw_particles;
@@ -324,6 +324,6 @@ private:
   // Neutrons and protons, for computing trajectory placements
   const G4InuclElementaryParticle neutronEP;
   const G4InuclElementaryParticle protonEP;
-};        
+};
 
-#endif // MYG4NUCLEI_MODEL_HH 
+#endif // MYG4NUCLEI_MODEL_HH

@@ -56,11 +56,11 @@
 
 class MyG4BertiniPiKBuilder : public G4VPiKBuilder
 {
-  public: 
+  public:
     MyG4BertiniPiKBuilder();
     virtual ~MyG4BertiniPiKBuilder();
 
-  public: 
+  public:
     virtual void Build(G4HadronElasticProcess * aP);
     virtual void Build(G4PionPlusInelasticProcess * aP);
     virtual void Build(G4PionMinusInelasticProcess * aP);
@@ -68,13 +68,13 @@ class MyG4BertiniPiKBuilder : public G4VPiKBuilder
     virtual void Build(G4KaonMinusInelasticProcess * aP);
     virtual void Build(G4KaonZeroLInelasticProcess * aP);
     virtual void Build(G4KaonZeroSInelasticProcess * aP);
-    
+
     void SetMinEnergy(G4double aM) {theMin = aM;}
     void SetMaxEnergy(G4double aM) {theMax = aM;}
 
   private:
     G4PiNuclearCrossSection* thePiData;
-    MyG4CascadeInterface * theModel;    
+    MyG4CascadeInterface * theModel;
     G4double theMin;
     G4double theMax;
 

@@ -73,6 +73,6 @@ private:
   G4int inter_case;
 };
 
-#endif // MYG4INTERACTION_CASE_HH 
+#endif // MYG4INTERACTION_CASE_HH
 
 

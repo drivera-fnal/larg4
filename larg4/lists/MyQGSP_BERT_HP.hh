@@ -50,9 +50,9 @@ class TMyQGSP_BERT_HP: public T
 public:
   TMyQGSP_BERT_HP(G4int ver=1);
   virtual ~TMyQGSP_BERT_HP();
-  
+
 public:
-  // SetCuts() 
+  // SetCuts()
   virtual void SetCuts();
 
 private:

@@ -64,17 +64,17 @@
 #include "MyG4CascadeInterface.hh"
 
 #include "Geant4/G4ChipsHyperonInelasticXS.hh"
-class MyG4HyperonFTFPBuilder 
+class MyG4HyperonFTFPBuilder
 {
-  public: 
+  public:
     MyG4HyperonFTFPBuilder();
     virtual ~MyG4HyperonFTFPBuilder();
 
-  public: 
+  public:
     void Build();
 
   private:
- 
+
     G4TheoFSGenerator * HyperonFTFP;
     G4TheoFSGenerator * AntiHyperonFTFP;
     G4GeneratorPrecompoundInterface * theCascade;
@@ -95,7 +95,7 @@ class MyG4HyperonFTFPBuilder
     G4AntiXiMinusInelasticProcess*  theAntiXiMinusInelastic;
     G4OmegaMinusInelasticProcess*  theOmegaMinusInelastic;
     G4AntiOmegaMinusInelasticProcess*  theAntiOmegaMinusInelastic;
-  
+
     //  G4QHadronInelasticDataSet * theCHIPSInelastic;
     G4VCrossSectionDataSet* theCHIPSInelastic;
     G4bool wasActivated;

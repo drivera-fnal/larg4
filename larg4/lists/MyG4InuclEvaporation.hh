@@ -57,7 +57,7 @@ private:
 
 public:
   G4FragmentVector * BreakItUp(const G4Fragment &theNucleus);
-      
+
   void setVerboseLevel( const G4int verbose );
 
 private:

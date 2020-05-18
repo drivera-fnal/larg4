@@ -40,7 +40,7 @@
 
 // Evaluate concrete types of input particles and assign bullet, target
 
-void MyG4InteractionCase::set(G4InuclParticle* part1, 
+void MyG4InteractionCase::set(G4InuclParticle* part1,
                             G4InuclParticle* part2) {
   clear();              // Reset everything in case of failure
 
@@ -61,7 +61,7 @@ void MyG4InteractionCase::set(G4InuclParticle* part1,
     } else {
       bullet = part2;
       target = part1;
-    } 
+    }
   } else if (nucl1 || nucl2) {  // Hadron on nucleus, hadron projectile
     inter_case = -1;
     if (nucl1 && had2) {

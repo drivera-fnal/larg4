@@ -43,7 +43,7 @@
 //
 //----------------------------------------------------------------------------
 //
-#include <iomanip>   
+#include <iomanip>
 
 #include "MyG4HadronPhysicsQGSP_BERT_HP.hh"
 //#include "Geant4/G4HadronPhysicsQGSP_BERT_HP.hh"
@@ -77,7 +77,7 @@
 //
 G4_DECLARE_PHYSCONSTR_FACTORY(MyG4HadronPhysicsQGSP_BERT_HP);
 
-G4ThreadLocal MyG4HadronPhysicsQGSP_BERT_HP::ThreadPrivate* 
+G4ThreadLocal MyG4HadronPhysicsQGSP_BERT_HP::ThreadPrivate*
 MyG4HadronPhysicsQGSP_BERT_HP::tpdata = 0;
 
 MyG4HadronPhysicsQGSP_BERT_HP::MyG4HadronPhysicsQGSP_BERT_HP(G4int)
@@ -139,7 +139,7 @@ void MyG4HadronPhysicsQGSP_BERT_HP::CreateModels()
 
   tpdata->theNeutrons=new G4NeutronBuilder( true ); // Fission on
   tpdata->theNeutrons->RegisterMe(tpdata->theQGSPNeutron=new G4QGSPNeutronBuilder(quasiElasticQGS));
-  tpdata->theQGSPNeutron->SetMinEnergy(minQGSP);   
+  tpdata->theQGSPNeutron->SetMinEnergy(minQGSP);
   tpdata->theNeutrons->RegisterMe(tpdata->theFTFPNeutron=new G4FTFPNeutronBuilder(quasiElasticFTF));
   tpdata->theFTFPNeutron->SetMinEnergy(minFTFP);
   tpdata->theFTFPNeutron->SetMaxEnergy(maxFTFP);
@@ -153,7 +153,7 @@ void MyG4HadronPhysicsQGSP_BERT_HP::CreateModels()
 
   tpdata->thePro=new G4ProtonBuilder;
   tpdata->thePro->RegisterMe(tpdata->theQGSPPro=new G4QGSPProtonBuilder(quasiElasticQGS));
-  tpdata->theQGSPPro->SetMinEnergy(minQGSP);   
+  tpdata->theQGSPPro->SetMinEnergy(minQGSP);
   tpdata->thePro->RegisterMe(tpdata->theFTFPPro=new G4FTFPProtonBuilder(quasiElasticFTF));
   tpdata->theFTFPPro->SetMinEnergy(minFTFP);
   tpdata->theFTFPPro->SetMaxEnergy(maxFTFP);
@@ -177,7 +177,7 @@ void MyG4HadronPhysicsQGSP_BERT_HP::CreateModels()
   tpdata->theAntiBaryon->RegisterMe(tpdata->theFTFPAntiBaryon=new G4FTFPAntiBarionBuilder(quasiElasticFTF));
 }
 
-MyG4HadronPhysicsQGSP_BERT_HP::~MyG4HadronPhysicsQGSP_BERT_HP() 
+MyG4HadronPhysicsQGSP_BERT_HP::~MyG4HadronPhysicsQGSP_BERT_HP()
 {
   if (!tpdata) return;
 
@@ -210,7 +210,7 @@ void MyG4HadronPhysicsQGSP_BERT_HP::ConstructParticle()
   pBaryonConstructor.ConstructParticle();
 
   G4ShortLivedConstructor pShortLivedConstructor;
-  pShortLivedConstructor.ConstructParticle();  
+  pShortLivedConstructor.ConstructParticle();
 
   G4IonConstructor pIonConstructor;
   pIonConstructor.ConstructParticle();
@@ -233,7 +233,7 @@ void MyG4HadronPhysicsQGSP_BERT_HP::ConstructProcess()
   G4PhysListUtil::FindInelasticProcess(G4KaonZeroShort::KaonZeroShort())->AddDataSet(kaonxs);
   G4PhysListUtil::FindInelasticProcess(G4KaonZeroLong::KaonZeroLong())->AddDataSet(kaonxs);
 
-  tpdata->theHyperon->Build(); 
+  tpdata->theHyperon->Build();
   tpdata->theAntiBaryon->Build();
 
   // --- Neutrons ---
@@ -255,8 +255,8 @@ void MyG4HadronPhysicsQGSP_BERT_HP::ConstructProcess()
   tpdata->xsNeutronCaptureXS = (G4NeutronCaptureXS*)G4CrossSectionDataSetRegistry::Instance()->GetCrossSectionDataSet(G4NeutronCaptureXS::Default_Name());
   capture->AddDataSet(tpdata->xsNeutronCaptureXS);
   capture->AddDataSet( new G4ParticleHPCaptureData );
-  G4NeutronRadCapture* theNeutronRadCapture = new G4NeutronRadCapture(); 
-  theNeutronRadCapture->SetMinEnergy( 19.9*MeV ); 
+  G4NeutronRadCapture* theNeutronRadCapture = new G4NeutronRadCapture();
+  theNeutronRadCapture->SetMinEnergy( 19.9*MeV );
   capture->RegisterMe( theNeutronRadCapture );
   if ( ! fission ) {
     fission = new G4HadronFissionProcess("nFission");

@@ -79,7 +79,7 @@ class MyG4ElementaryParticleCollider : public MyG4CascadeColliderBase {
 public:
   MyG4ElementaryParticleCollider();
   virtual ~MyG4ElementaryParticleCollider() {};
-  
+
   void collide(G4InuclParticle* bullet, G4InuclParticle* target,
 	       G4CollisionOutput& output);
 
@@ -94,22 +94,22 @@ private:
 
   void generateSCMfinalState(G4double ekin, G4double etot_scm,
 			     G4InuclElementaryParticle* particle1,
-			     G4InuclElementaryParticle* particle2); 
+			     G4InuclElementaryParticle* particle2);
 
   // Pion (or photon) absorption on a dibaryon
   void generateSCMpionAbsorption(G4double etot_scm,
 				 G4InuclElementaryParticle* particle1,
-				 G4InuclElementaryParticle* particle2); 
+				 G4InuclElementaryParticle* particle2);
 
   // Muon absorption on a dibaryon (with outgoing neutrino)
   void generateSCMmuonAbsorption(G4double etot_scm,
 				 G4InuclElementaryParticle* particle1,
-				 G4InuclElementaryParticle* particle2); 
+				 G4InuclElementaryParticle* particle2);
 
   // Pion absorption on a single nucleon (charge exchange)
   void generateSCMpionNAbsorption(G4double etot_scm,
 				  G4InuclElementaryParticle* particle1,
-				  G4InuclElementaryParticle* particle2); 
+				  G4InuclElementaryParticle* particle2);
 
   G4bool pionNucleonAbsorption(G4double ekin) const;
 

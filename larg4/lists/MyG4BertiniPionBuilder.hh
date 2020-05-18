@@ -57,21 +57,21 @@
 
 class MyG4BertiniPionBuilder : public G4VPionBuilder
 {
-  public: 
+  public:
     MyG4BertiniPionBuilder();
     virtual ~MyG4BertiniPionBuilder();
 
-  public: 
+  public:
     virtual void Build(G4HadronElasticProcess * aP);
     virtual void Build(G4PionPlusInelasticProcess * aP);
     virtual void Build(G4PionMinusInelasticProcess * aP);
-    
+
     void SetMinEnergy(G4double aM) {theMin = aM;}
     void SetMaxEnergy(G4double aM) {theMax = aM;}
 
   private:
     G4PiNuclearCrossSection* thePiData;
-    MyG4CascadeInterface * theModel;    
+    MyG4CascadeInterface * theModel;
     G4double theMin;
     G4double theMax;
 

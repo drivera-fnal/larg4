@@ -90,15 +90,15 @@ void MyG4Analyser::try_watchers(G4int a, G4int z, G4bool if_nucl) {
     G4cout << " >>> MyG4Analyser::try_watchers" << G4endl;
   }
 
-  for (G4int iw = 0; iw < G4int(ana_watchers.size()); iw++) { 
+  for (G4int iw = 0; iw < G4int(ana_watchers.size()); iw++) {
 
     if (if_nucl) {
 
-      if (ana_watchers[iw].look_forNuclei()) ana_watchers[iw].watch(a, z); 
+      if (ana_watchers[iw].look_forNuclei()) ana_watchers[iw].watch(a, z);
 
     } else {
 
-      if (!ana_watchers[iw].look_forNuclei()) ana_watchers[iw].watch(a, z); 
+      if (!ana_watchers[iw].look_forNuclei()) ana_watchers[iw].watch(a, z);
     }
   }
 }
@@ -128,9 +128,9 @@ void MyG4Analyser::analyse(const G4CollisionOutput& output, const G4InuclParticl
         G4int a = nucleus[in].getA();
         G4int z = nucleus[in].getZ();
 
-        if (in == 0) { 
-          averageA += a; 
-          averageZ += z; 
+        if (in == 0) {
+          averageA += a;
+          averageZ += z;
         };
 
         if (a > 10) nbig++;
@@ -164,7 +164,7 @@ void MyG4Analyser::analyse(const G4CollisionOutput& output, const G4InuclParticl
             zp = 0;
             averageNeutronNumber += 1.0;
             averageNeutronKinEnergy += particles[i].getKineticEnergy();
-          };  
+          };
 
         } else if (particles[i].pion()) {
           averagePionKinEnergy += particles[i].getKineticEnergy();
@@ -175,11 +175,11 @@ void MyG4Analyser::analyse(const G4CollisionOutput& output, const G4InuclParticl
             zp = 1;
             averagePionPl += 1.0;
 
-          } else if (particles[i].type() == 5) {  
+          } else if (particles[i].type() == 5) {
             zp = -1;
             averagePionMin += 1.0;
 
-          } else if (particles[i].type() == 7) { 
+          } else if (particles[i].type() == 7) {
             zp = 0;
             averagePion0 += 1.0;
           };
@@ -223,10 +223,10 @@ void MyG4Analyser::analyse(const G4CollisionOutput& output, const G4InuclParticl
         if (particles[i].type() == 3) {
           averagePionPl += 1.0;
 
-        } else if (particles[i].type() == 5) {  
+        } else if (particles[i].type() == 5) {
           averagePionMin += 1.0;
 
-        } else if (particles[i].type() == 7) { 
+        } else if (particles[i].type() == 7) {
           averagePion0 += 1.0;
         }
       } else if (particles[i].isPhoton()) {
@@ -260,8 +260,8 @@ void MyG4Analyser::printResultsSimple() {
          << " average photon Ekin " << averagePhotonKinEnergy / (averagePhotonNumber +
                                                              1.0e-10) << G4endl;
   if (withNuclei) {
-    G4cout                 
-      << " average Exitation Energy " << 
+    G4cout
+      << " average Exitation Energy " <<
       averageExitationEnergy / averageOutgoingNuclei << G4endl
       << " average num of fragments " << averageOutgoingNuclei / eventNumber << G4endl;
     G4cout << " fission prob. " << fissy_prob / eventNumber << " c.sec " <<
@@ -296,12 +296,12 @@ void MyG4Analyser::printResults() {
          << " average photon number " << averagePhotonNumber / eventNumber << G4endl
          << " average photon Ekin " << averagePhotonKinEnergy / (averagePhotonNumber +
                                                              1.0e-10) << G4endl;
-                   
+
   if (withNuclei) {
     G4cout
-      << " average A " << averageA / eventNumber << G4endl                 
-      << " average Z " << averageZ / eventNumber << G4endl                 
-      << " average Exitation Energy " << 
+      << " average A " << averageA / eventNumber << G4endl
+      << " average Z " << averageZ / eventNumber << G4endl
+      << " average Exitation Energy " <<
       averageExitationEnergy / averageOutgoingNuclei << G4endl
       << " average num of fragments " << averageOutgoingNuclei / eventNumber << G4endl;
     G4cout << " fission prob. " << fissy_prob / eventNumber << " c.sec " <<
@@ -344,7 +344,7 @@ void MyG4Analyser::handleWatcherStatistics() {
       std::pair<G4double, G4double> rat_err = ana_watchers[iw].getAverageRatio();
       averat += rat_err.first;
       ave_err += rat_err.second;
-      gl_chsq += ana_watchers[iw].getChsq();   
+      gl_chsq += ana_watchers[iw].getChsq();
       std::pair<G4double, G4double> cs_err = ana_watchers[iw].getExpCs();
       tot_exper += cs_err.first;
       tot_exper_err += cs_err.second;
@@ -355,7 +355,7 @@ void MyG4Analyser::handleWatcherStatistics() {
 
       if (iz_checked > 0.0) {
         fgr += ana_watchers[iw].getLhood();
-        checked += iz_checked;    
+        checked += iz_checked;
       };
     };
   };
@@ -364,7 +364,7 @@ void MyG4Analyser::handleWatcherStatistics() {
     gl_chsq = std::sqrt(gl_chsq) / checked;
     averat /= checked;
     ave_err /= checked;
-    fgr = std::pow(10.0, std::sqrt(fgr / checked)); 
+    fgr = std::pow(10.0, std::sqrt(fgr / checked));
   };
 
   if (verboseLevel > 3) {
@@ -382,13 +382,13 @@ void MyG4Analyser::printResultsNtuple() {
     G4cout << " >>> MyG4Analyser::printResultsNtuple" << G4endl;
   }
 
-  // Create one line of ASCII data. 
-  // Several runs should create ntuple for data-analysis 
+  // Create one line of ASCII data.
+  // Several runs should create ntuple for data-analysis
   G4cout <<
     std::setw(15) << bulletPDG <<
     std::setw(15) << bulletKineticEnergy <<
     std::setw(15) << int(eventNumber + 0.1) <<
-    std::setw(15) << averageMultiplicity / eventNumber << 
+    std::setw(15) << averageMultiplicity / eventNumber <<
     std::setw(15) << averageProtonNumber / eventNumber <<
     std::setw(15) << averageNeutronNumber / eventNumber << " " <<
     std::setw(15) << averageNucleonKinEnergy / (averageProtonNumber + averageNeutronNumber) << " " <<

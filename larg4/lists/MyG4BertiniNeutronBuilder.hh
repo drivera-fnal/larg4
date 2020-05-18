@@ -49,27 +49,27 @@
 #include "Geant4/G4NeutronInelasticProcess.hh"
 #include "Geant4/G4VNeutronBuilder.hh"
 
-//#include "Geant4/G4CascadeInterface.hh"   
-#include "MyG4CascadeInterface.hh"   
+//#include "Geant4/G4CascadeInterface.hh"
+#include "MyG4CascadeInterface.hh"
 
 class MyG4BertiniNeutronBuilder : public G4VNeutronBuilder
 {
-  public: 
+  public:
     MyG4BertiniNeutronBuilder();
     virtual ~MyG4BertiniNeutronBuilder();
 
-  public: 
+  public:
     virtual void Build(G4HadronElasticProcess * aP);
     virtual void Build(G4HadronFissionProcess * aP);
     virtual void Build(G4HadronCaptureProcess * aP);
     virtual void Build(G4NeutronInelasticProcess * aP);
-    
+
     void SetMinEnergy(G4double aM) {theMin = aM;}
     void SetMaxEnergy(G4double aM) {theMax = aM;}
 
   private:
-    //<--G4CascadeInterface * theModel;    
-    MyG4CascadeInterface * theModel;    
+    //<--G4CascadeInterface * theModel;
+    MyG4CascadeInterface * theModel;
     G4double theMin;
     G4double theMax;
 

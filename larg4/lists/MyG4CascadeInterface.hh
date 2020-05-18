@@ -25,7 +25,7 @@
 //
 // $Id: MyG4CascadeInterface.hh 71938 2013-06-28 19:01:00Z mkelsey $
 // Defines an interface to Bertini (BERT) cascade
-// based on INUCL  intra-nuclear transport.models 
+// based on INUCL  intra-nuclear transport.models
 // with bullet hadron energy ~< 10 GeV
 //
 // 20100405  M. Kelsey -- Fix constness of op== and op!=
@@ -38,8 +38,8 @@
 // 20110224  M. Kelsey -- Add createTarget() for use with Propagate(); split
 //		conservation law messages to separate function.  Move verbose
 //		setting to .cc file, and apply to all member objects.
-// 20110301  M. Kelsey -- Add copyPreviousCascade() for use with Propagate()  
-//		along with new buffers and related particle-conversion  
+// 20110301  M. Kelsey -- Add copyPreviousCascade() for use with Propagate()
+//		along with new buffers and related particle-conversion
 //		functions.  Encapulate buffer deletion in clear()
 // 20110303  M. Kelsey -- Change "bulletList" name to "inputFragments"
 // 20110304  M. Kelsey -- Drop conversion of Propagate() arguments; pass
@@ -105,7 +105,7 @@ public:
 
   G4ReactionProductVector* Propagate(G4KineticTrackVector* theSecondaries,
 				     G4V3DNucleus* theNucleus);
-  
+
   G4HadFinalState* ApplyYourself(const G4HadProjectile& aTrack,
 				 G4Nucleus& theNucleus);
 

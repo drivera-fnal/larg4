@@ -78,7 +78,7 @@ void MyG4CascadeColliderBase::setVerboseLevel(G4int verbose) {
 
 // Both bullet and target must be hadrons or photons for this to work
 
-G4bool MyG4CascadeColliderBase::useEPCollider(G4InuclParticle* bullet, 
+G4bool MyG4CascadeColliderBase::useEPCollider(G4InuclParticle* bullet,
 					    G4InuclParticle* target) const {
   return (dynamic_cast<G4InuclElementaryParticle*>(bullet) &&
 	  dynamic_cast<G4InuclElementaryParticle*>(target));
@@ -87,9 +87,9 @@ G4bool MyG4CascadeColliderBase::useEPCollider(G4InuclParticle* bullet,
 
 // Decide whether bullet-target interaction is candidate for cascade
 
-G4bool 
+G4bool
 MyG4CascadeColliderBase::inelasticInteractionPossible(G4InuclParticle* bullet,
-						    G4InuclParticle* target, 
+						    G4InuclParticle* target,
 						    G4double ekin) const {
   if (verboseLevel) {
     G4cout << " >>> " << theName << "::inelasticInteractionPossible" << G4endl;
@@ -103,16 +103,16 @@ MyG4CascadeColliderBase::inelasticInteractionPossible(G4InuclParticle* bullet,
   G4InuclNuclei* nuclei_bullet = dynamic_cast<G4InuclNuclei*>(bullet);
   G4double ab = nuclei_bullet ? nuclei_bullet->getA() : 1;	// FIXME
   G4double zb = nuclei_bullet ? nuclei_bullet->getZ() : bullet->getCharge();
-  
+
   G4InuclNuclei* nuclei_target = dynamic_cast<G4InuclNuclei*>(target);
   G4double at = nuclei_target ? nuclei_target->getA() : 1;	// FIXME
   G4double zt = nuclei_target ? nuclei_target->getZ() : target->getCharge();
-  
+
   // VCOL (Coulomb barrier) used for testing if elastic collision necessary
   const G4double coeff = 0.001 * 1.2;
 
-  G4double VCOL = coeff * zt * zb / (G4cbrt(at) + G4cbrt(ab)); 
-  
+  G4double VCOL = coeff * zt * zb / (G4cbrt(at) + G4cbrt(ab));
+
   G4bool possible = true;	// Force inelastic; should be (ekin >= VCOL)
 
   if (verboseLevel > 3) {

@@ -58,13 +58,13 @@
 //		provide support for projectile nucleus
 // 20100919  M. Kelsey -- Fix incorrect logic in retryInelasticNucleus()
 // 20100922  M. Kelsey -- Add functions to select de-excitation method
-// 20100924  M. Kelsey -- Migrate to "OutgoingNuclei" names in CollisionOutput 
+// 20100924  M. Kelsey -- Migrate to "OutgoingNuclei" names in CollisionOutput
 // 20110224  M. Kelsey -- Add createTarget() for use with Propagate(); split
 //		conservation law messages to separate function; begin to add
 //		infrastructure code to Propagate.  Move verbose
 //		setting to .cc file, and apply to all member objects.
-// 20110301  M. Kelsey -- Add copyPreviousCascade() for use with Propagate()  
-//		along with new buffers and related particle-conversion  
+// 20110301  M. Kelsey -- Add copyPreviousCascade() for use with Propagate()
+//		along with new buffers and related particle-conversion
 //		functions.  Encapulate buffer deletion in clear().  Add some
 //		diagnostic messages.
 // 20110302  M. Kelsey -- Redo diagnostics inside G4CASCADE_DEBUG_INTERFACE
@@ -148,7 +148,7 @@ typedef std::vector<G4InuclNuclei>::const_iterator nucleiIterator;
 // Constructor and destrutor
 
 MyG4CascadeInterface::MyG4CascadeInterface(const G4String& name)
-  : G4VIntraNuclearTransportModel(name), 
+  : G4VIntraNuclearTransportModel(name),
     randomFile(G4CascadeParameters::randomFile()),
     maximumTries(20), numberOfTries(0),
     collider(new MyG4InuclCollider), balance(new G4CascadeCheckBalance(name)),
@@ -259,8 +259,8 @@ G4bool MyG4CascadeInterface::IsApplicable(const G4ParticleDefinition* aPD) const
 
 // Main Actions
 
-G4HadFinalState* 
-MyG4CascadeInterface::ApplyYourself(const G4HadProjectile& aTrack, 
+G4HadFinalState*
+MyG4CascadeInterface::ApplyYourself(const G4HadProjectile& aTrack,
 				  G4Nucleus& theNucleus) {
   if (verboseLevel)
     G4cout << " >>> MyG4CascadeInterface::ApplyYourself" << G4endl;
@@ -280,7 +280,7 @@ MyG4CascadeInterface::ApplyYourself(const G4HadProjectile& aTrack,
 #endif
 
   if (!randomFile.empty()) {		// User requested random-seed capture
-    if (verboseLevel>=1) 
+    if (verboseLevel>=1)
       G4cout << " Saving random engine state to " << randomFile << G4endl;
     CLHEP::HepRandom::saveEngineStatus(randomFile);
   }
@@ -312,18 +312,18 @@ MyG4CascadeInterface::ApplyYourself(const G4HadProjectile& aTrack,
   do {   			// we try to create inelastic interaction
     if (verboseLevel >= 1)
       G4cout << " Generating cascade attempt " << numberOfTries << G4endl;
-    
+
     output->reset();
     collider->collide(bullet, target, *output);
     balance->collide(bullet, target, *output);
-    
+
     numberOfTries++;
     /* Loop checking 08.06.2015 MHK */
   } while ( isHydrogen ? retryInelasticProton() : retryInelasticNucleus() );
 
   // Null event if unsuccessful
   if (numberOfTries >= maximumTries) {
-    if (verboseLevel) 
+    if (verboseLevel)
       G4cout << " Cascade aborted after trials " << numberOfTries << G4endl;
     return NoInteraction(aTrack, theNucleus);
   }
@@ -366,7 +366,7 @@ MyG4CascadeInterface::ApplyYourself(const G4HadProjectile& aTrack,
   for (G4int i = 0; i < nSec; i++) {
     G4HadSecondary* sec = theParticleChange.GetSecondary(i);
     G4DynamicParticle* dp = sec->GetParticle();
-    if (dp->GetDefinition()->GetParticleName() == "neutron") 
+    if (dp->GetDefinition()->GetParticleName() == "neutron")
       G4cout << dp->GetDefinition()->GetParticleName() << " has "
              << dp->GetKineticEnergy()/MeV << " MeV " << G4endl;
   }
@@ -375,7 +375,7 @@ MyG4CascadeInterface::ApplyYourself(const G4HadProjectile& aTrack,
   return &theParticleChange;
 }
 
-G4ReactionProductVector* 
+G4ReactionProductVector*
 MyG4CascadeInterface::Propagate(G4KineticTrackVector* theSecondaries,
 			      G4V3DNucleus* theNucleus) {
   if (verboseLevel) G4cout << " >>> MyG4CascadeInterface::Propagate" << G4endl;
@@ -388,7 +388,7 @@ MyG4CascadeInterface::Propagate(G4KineticTrackVector* theSecondaries,
 	   << "\n " << theSecondaries->size() << " secondaries:" << G4endl;
     for (size_t i=0; i<theSecondaries->size(); i++) {
       G4KineticTrack* kt = (*theSecondaries)[i];
-      G4cout << " " << i << ": " << kt->GetDefinition()->GetParticleName() 
+      G4cout << " " << i << ": " << kt->GetDefinition()->GetParticleName()
 	     << " p " << kt->Get4Momentum() << " @ " << kt->GetPosition()
 	     << " t " << kt->GetFormationTime() << G4endl;
     }
@@ -396,7 +396,7 @@ MyG4CascadeInterface::Propagate(G4KineticTrackVector* theSecondaries,
 #endif
 
   if (!randomFile.empty()) {		// User requested random-seed capture
-    if (verboseLevel>=1) 
+    if (verboseLevel>=1)
       G4cout << " Saving random engine state to " << randomFile << G4endl;
     CLHEP::HepRandom::saveEngineStatus(randomFile);
   }
@@ -451,10 +451,10 @@ MyG4CascadeInterface::Propagate(G4KineticTrackVector* theSecondaries,
 
 // Replicate input particles onto output
 
-G4HadFinalState* 
+G4HadFinalState*
 MyG4CascadeInterface::NoInteraction(const G4HadProjectile& aTrack,
 				  G4Nucleus& /*theNucleus*/) {
-  if (verboseLevel) 
+  if (verboseLevel)
     G4cout << " >>> MyG4CascadeInterface::NoInteraction" << G4endl;
 
   theParticleChange.Clear();
@@ -493,7 +493,7 @@ G4bool MyG4CascadeInterface::createBullet(const G4HadProjectile& aTrack) {
 
   // Code momentum and energy -- Bertini wants z-axis and GeV units
   G4LorentzVector projectileMomentum = aTrack.Get4Momentum()/GeV;
-  
+
   // Rotation/boost to get from z-axis back to original frame
   bulletInLabFrame = G4LorentzRotation::IDENTITY;	// Initialize
   bulletInLabFrame.rotateZ(-projectileMomentum.phi());
@@ -502,7 +502,7 @@ G4bool MyG4CascadeInterface::createBullet(const G4HadProjectile& aTrack) {
 
   G4LorentzVector momentumBullet(0., 0., projectileMomentum.rho(),
 				 projectileMomentum.e());
-  
+
   if (G4InuclElementaryParticle::valid(bulletType)) {
     hadronBullet.fill(momentumBullet, bulletType, G4InuclParticle::bullet); // -- book-keep model
     bullet = &hadronBullet;
@@ -511,7 +511,7 @@ G4bool MyG4CascadeInterface::createBullet(const G4HadProjectile& aTrack) {
     bullet = &nucleusBullet;
   }
 
-  if (verboseLevel >= 2) G4cout << "Bullet:  \n" << *bullet << G4endl;  
+  if (verboseLevel >= 2) G4cout << "Bullet:  \n" << *bullet << G4endl;
 
   return true;
 }
@@ -549,36 +549,36 @@ G4bool MyG4CascadeInterface::createTarget(G4int A, G4int Z) {
 G4DynamicParticle* MyG4CascadeInterface::
 makeDynamicParticle(const G4InuclElementaryParticle& iep) const {
   G4int outgoingType = iep.type();
-  
+
   if (iep.quasi_deutron()) {
     G4cerr << " ERROR: MyG4CascadeInterface incompatible particle type "
 	   << outgoingType << G4endl;
     return 0;
   }
-  
+
   // Copy local G4DynPart to public output (handle kaon mixing specially)
   if (outgoingType == kaonZero || outgoingType == kaonZeroBar) {
     G4ThreeVector momDir = iep.getMomentum().vect().unit();
     G4double ekin = iep.getKineticEnergy()*GeV;	// Bertini -> G4 units
-    
+
     G4ParticleDefinition* pd = G4KaonZeroShort::Definition();
     if (G4UniformRand() > 0.5) pd = G4KaonZeroLong::Definition();
-    
+
     return new G4DynamicParticle(pd, momDir, ekin);
   } else {
     return new G4DynamicParticle(iep.getDynamicParticle());
   }
-  
+
   return 0;	// Should never get here!
 }
- 
-G4DynamicParticle* 
+
+G4DynamicParticle*
 MyG4CascadeInterface::makeDynamicParticle(const G4InuclNuclei& inuc) const {
   if (verboseLevel >= 2) {
     G4cout << " Nuclei fragment: \n" << inuc << G4endl;
   }
-  
-  // Copy local G4DynPart to public output 
+
+  // Copy local G4DynPart to public output
   return new G4DynamicParticle(inuc.getDynamicParticle());
 }
 
@@ -604,7 +604,7 @@ void MyG4CascadeInterface::copyOutputToHadronicResult() {
   }
 
   // get nuclei fragments
-  if (!outgoingNuclei.empty()) { 
+  if (!outgoingNuclei.empty()) {
     nucleiIterator ifrag = outgoingNuclei.begin();
     for (; ifrag != outgoingNuclei.end(); ifrag++) {
       theParticleChange.AddSecondary(makeDynamicParticle(*ifrag));
@@ -625,7 +625,7 @@ G4ReactionProductVector* MyG4CascadeInterface::copyOutputToReactionProducts() {
   G4DynamicParticle* dp = 0;
 
   // Get outcoming particles
-  if (!particles.empty()) { 
+  if (!particles.empty()) {
     particleIterator ipart = particles.begin();
     for (; ipart != particles.end(); ipart++) {
       rp = new G4ReactionProduct;
@@ -637,7 +637,7 @@ G4ReactionProductVector* MyG4CascadeInterface::copyOutputToReactionProducts() {
   }
 
   // get nuclei fragments
-  if (!fragments.empty()) { 
+  if (!fragments.empty()) {
     nucleiIterator ifrag = fragments.begin();
     for (; ifrag != fragments.end(); ifrag++) {
       rp = new G4ReactionProduct;
@@ -679,7 +679,7 @@ void MyG4CascadeInterface::checkFinalResult() {
     G4cout << "Initial energy " << eInit << " final energy " << eFinal
 	   << "\nTotal energy conservation at level "
 	   << balance->deltaE() * GeV << " MeV" << G4endl;
-    
+
     if (balance->deltaKE() > 5.0e-5 ) { 	// 0.05 MeV
       G4cerr << "FATAL ERROR: kinetic energy created  "
              << balance->deltaKE() * GeV << " MeV" << G4endl;
@@ -751,7 +751,7 @@ G4bool MyG4CascadeInterface::retryInelasticNucleus() const {
 
 #ifdef MYG4CASCADE_DEBUG_INTERFACE
   // Report on all retry conditions, in order of return logic
-  G4cout << "Inside MyG4CascadeInterface.cc \n" 
+  G4cout << "Inside MyG4CascadeInterface.cc \n"
    << " retryInelasticNucleus: numberOfTries "
 	 << ((numberOfTries < maximumTries) ? "RETRY (t)" : "EXIT (f)")
 	 << "\n retryInelasticNucleus: AND outputParticles "
@@ -805,18 +805,18 @@ void MyG4CascadeInterface::throwNonConservationFailure() {
     errInfo << " Energy conservation violated by " << balance->deltaE()
 	    << " GeV (" << balance->relativeE() << ")" << G4endl;
   }
-  
+
   if (!balance->momentumOkay()) {
     throwMsg += "Momentum";
     errInfo << " Momentum conservation violated by " << balance->deltaP()
 	    << " GeV/c (" << balance->relativeP() << ")" << G4endl;
   }
-  
+
   if (!balance->baryonOkay()) {
     throwMsg += "Baryon number";
     errInfo << " Baryon number violated by " << balance->deltaB() << G4endl;
   }
-  
+
   if (!balance->chargeOkay()) {
     throwMsg += "Charge";
     errInfo << " Charge conservation violated by " << balance->deltaQ()
@@ -827,7 +827,7 @@ void MyG4CascadeInterface::throwNonConservationFailure() {
 	 << " Bullet:  \n" << *bullet << G4endl
 	 << " Target:  \n" << *target << G4endl;
   output->printCollisionOutput(errInfo);
-  
+
   throwMsg += " non-conservation. More info in output.";
   throw G4HadronicException(__FILE__, __LINE__, throwMsg);   // Job ends here!
 }

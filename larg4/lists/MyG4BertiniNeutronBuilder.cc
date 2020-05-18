@@ -32,7 +32,7 @@
 // Author: 2002 H.P. Wellisch
 //
 // Modified:
-// 02.04.2009 V.Ivanchenko remove add cross section, string builderis reponsible 
+// 02.04.2009 V.Ivanchenko remove add cross section, string builderis reponsible
 // 30.03.2020 D. Rivera copy based on:
 //    geant4.10.03.p03/source/physics_lists/builders/src/G4BertiniNeutronBuilder.cc
 //
@@ -46,7 +46,7 @@
 #include "Geant4/G4ProcessManager.hh"
 
 MyG4BertiniNeutronBuilder::
-MyG4BertiniNeutronBuilder() 
+MyG4BertiniNeutronBuilder()
 {
   theMin = 0;
   theMax = 9.9*GeV;
@@ -62,7 +62,7 @@ Build(G4NeutronInelasticProcess * aP)
 }
 
 MyG4BertiniNeutronBuilder::
-~MyG4BertiniNeutronBuilder() 
+~MyG4BertiniNeutronBuilder()
 {
 }
 

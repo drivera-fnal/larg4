@@ -143,11 +143,11 @@ void MyG4InuclCollider::collide(G4InuclParticle* bullet, G4InuclParticle* target
   if (useEPCollider(bullet,target)) {
     if (verboseLevel > 2)
       G4cout << " InuclCollider -> particle on particle collision" << G4endl;
- 
+
     theElementaryParticleCollider->collide(bullet, target, globalOutput);
     return;
   }
-  
+
   interCase.set(bullet,target);		// Classify collision type
   if (verboseLevel > 2) {
     G4cout << " InuclCollider -> inter case " << interCase.code() << G4endl;
@@ -175,9 +175,9 @@ void MyG4InuclCollider::collide(G4InuclParticle* bullet, G4InuclParticle* target
   G4int zb = 0;
   // -- retreive G4InuclParticle::Model
   G4InuclParticle::Model mod = interCase.getBullet()->getModel();
-  
+
   if (interCase.hadNucleus()) { 	// particle with nuclei
-    G4InuclElementaryParticle* pbullet = 
+    G4InuclElementaryParticle* pbullet =
       dynamic_cast<G4InuclElementaryParticle*>(interCase.getBullet());
 
     if (!pbullet) {
@@ -195,21 +195,21 @@ void MyG4InuclCollider::collide(G4InuclParticle* bullet, G4InuclParticle* target
 
     btype = pbullet->type();
   } else { 				// nuclei with nuclei
-    G4InuclNuclei* nbullet = 
+    G4InuclNuclei* nbullet =
       dynamic_cast<G4InuclNuclei*>(interCase.getBullet());
     if (!nbullet) {
       G4cerr << " InuclCollider -> ERROR bullet is not a nucleus " << G4endl;
       globalOutput.trivialise(bullet, target);
       return;
     }
-    
+
     ab = nbullet->getA();
     zb = nbullet->getZ();
   }
 
   G4LorentzConvertor convertToTargetRestFrame(bullet, ntarget);
   G4double ekin = convertToTargetRestFrame.getKinEnergyInTheTRS();
-  
+
   if (verboseLevel > 3) G4cout << " ekin in trs " << ekin << G4endl;
 
   if (!inelasticInteractionPossible(bullet, target, ekin)) {
@@ -227,7 +227,7 @@ void MyG4InuclCollider::collide(G4InuclParticle* bullet, G4InuclParticle* target
     G4cout << " degenerated? " << convertToTargetRestFrame.trivial()
 	   << G4endl;
   }
-  
+
   G4LorentzVector bmom;			// Bullet is along local Z
   bmom.setZ(convertToTargetRestFrame.getTRSMomentum());
 
@@ -248,7 +248,7 @@ void MyG4InuclCollider::collide(G4InuclParticle* bullet, G4InuclParticle* target
     output.reset();
 
     theIntraNucleiCascader->collide(zbullet, target, output);
-    
+
     if (verboseLevel > 1) G4cout << " After Cascade " << G4endl;
 
     deexcite(output.getRecoilFragment(), output);
@@ -270,7 +270,7 @@ void MyG4InuclCollider::collide(G4InuclParticle* bullet, G4InuclParticle* target
     // FIXME:  This should no longer be necessary!
     globalOutput.setOnShell(bullet, target);
     if (globalOutput.acceptable()) {
-      if (verboseLevel) 
+      if (verboseLevel)
 	G4cout << " InuclCollider output after trials " << itry << G4endl;
       delete zbullet;
       return;
@@ -279,12 +279,12 @@ void MyG4InuclCollider::collide(G4InuclParticle* bullet, G4InuclParticle* target
 	G4cerr << " InuclCollider setOnShell failed." << G4endl;
     }
   }	// while (itry < itry_max)
-  
+
   if (verboseLevel) {
-    G4cout << " InuclCollider -> can not generate acceptable inter. after " 
+    G4cout << " InuclCollider -> can not generate acceptable inter. after "
 	   << itry_max << " attempts " << G4endl;
   }
-  
+
   globalOutput.trivialise(bullet, target);
 
   delete zbullet;
@@ -306,7 +306,7 @@ void MyG4InuclCollider::rescatter(G4InuclParticle* bullet,
   globalOutput.reset();		// Clear buffers for this attempt
   output.reset();
 
-  theIntraNucleiCascader->rescatter(bullet, theSecondaries, theNucleus, 
+  theIntraNucleiCascader->rescatter(bullet, theSecondaries, theNucleus,
 				    output);
 
   if (verboseLevel > 1) G4cout << " After Rescatter" << G4endl;
@@ -316,7 +316,7 @@ void MyG4InuclCollider::rescatter(G4InuclParticle* bullet,
 
   globalOutput.add(output);	// Add local results to global output
 
-  if (verboseLevel) 
+  if (verboseLevel)
     G4cout << " InuclCollider output after trials " << itry << G4endl;
 }
 
@@ -374,7 +374,7 @@ G4bool MyG4InuclCollider::photonuclearOkay(G4CollisionOutput& checkOutput) const
     mfinalNuc = checkOutput.getOutgoingNuclei()[0].getMass();
   G4double mtargetNuc = interCase.getTarget()->getMass();
   if (mfinalNuc != mtargetNuc) return true;	// Mass from G4Ions is fixed
-  
+
   if (verboseLevel>2)
     G4cout << " photonuclear produced only gammas.  Try again." << G4endl;
 

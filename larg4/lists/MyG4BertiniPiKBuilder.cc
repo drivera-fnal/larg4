@@ -48,17 +48,17 @@
 #include "Geant4/G4CrossSectionDataSetRegistry.hh"
 
 MyG4BertiniPiKBuilder::
-MyG4BertiniPiKBuilder() 
+MyG4BertiniPiKBuilder()
  {
    thePiData = (G4PiNuclearCrossSection*)G4CrossSectionDataSetRegistry::Instance()->GetCrossSectionDataSet(G4PiNuclearCrossSection::Default_Name());
    theMin = 0*GeV;
    theMax = 9.9*GeV;
    theModel = new MyG4CascadeInterface;
    theModel->SetMinEnergy(theMin);
-   theModel->SetMaxEnergy(theMax); 
+   theModel->SetMaxEnergy(theMax);
  }
 
-MyG4BertiniPiKBuilder::~MyG4BertiniPiKBuilder() 
+MyG4BertiniPiKBuilder::~MyG4BertiniPiKBuilder()
 {
 }
 

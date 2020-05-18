@@ -84,12 +84,12 @@ class G4ComponentGGHadronNucleusXsc;
 
 class MyG4HadronPhysicsQGSP_BERT_HP : public G4VPhysicsConstructor
 {
-  public: 
+  public:
     MyG4HadronPhysicsQGSP_BERT_HP(G4int verbose =2);
     MyG4HadronPhysicsQGSP_BERT_HP(const G4String& name, G4bool quasiElastic=true);
     virtual ~MyG4HadronPhysicsQGSP_BERT_HP();
 
-  public: 
+  public:
     virtual void ConstructParticle();
     virtual void ConstructProcess();
 
@@ -112,7 +112,7 @@ class MyG4HadronPhysicsQGSP_BERT_HP : public G4VPhysicsConstructor
 
       G4ProtonBuilder * thePro;
       G4FTFPProtonBuilder * theFTFPPro;
-      G4QGSPProtonBuilder * theQGSPPro; 
+      G4QGSPProtonBuilder * theQGSPPro;
       //<--G4BertiniProtonBuilder * theBertiniPro;
       MyG4BertiniProtonBuilder * theBertiniPro;
 

@@ -143,7 +143,7 @@ protected:
   // Test if particle is able to interact in nucleus
   G4bool particleCanInteract(const G4CascadParticle& cpart) const;
 
-private: 
+private:
   MyG4NucleiModel* model;
   MyG4ElementaryParticleCollider* theElementaryParticleCollider;
   G4CascadeRecoilMaker* theRecoilMaker;
@@ -174,6 +174,6 @@ private:
   // Copying of modules is forbidden
   MyG4IntraNucleiCascader(const MyG4IntraNucleiCascader&);
   MyG4IntraNucleiCascader& operator=(const MyG4IntraNucleiCascader&);
-};        
+};
 
 #endif /* MYG4INTRA_NUCLEI_CASCADER_HH */

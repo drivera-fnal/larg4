@@ -81,12 +81,12 @@ protected:
   MyG4InteractionCase interCase;		// Determine bullet vs. target
 
   // Decide whether to use G4ElementaryParticleCollider or not
-  virtual G4bool useEPCollider(G4InuclParticle* bullet, 
+  virtual G4bool useEPCollider(G4InuclParticle* bullet,
 			       G4InuclParticle* target) const;
 
   // Decide whether to use G4IntraNuclearCascader or not
   virtual G4bool inelasticInteractionPossible(G4InuclParticle* bullet,
-					      G4InuclParticle* target, 
+					      G4InuclParticle* target,
 					      G4double ekin) const;
 
   // ==> Provide same interfaces as G4CascadeCheckBalance itself
@@ -110,6 +110,6 @@ private:
   // Copying of modules is forbidden
   MyG4CascadeColliderBase(const MyG4CascadeColliderBase&);
   MyG4CascadeColliderBase& operator=(const MyG4CascadeColliderBase&);
-};        
+};
 
 #endif	/* MYG4CASCADE_COLLIDER_BASE_HH */

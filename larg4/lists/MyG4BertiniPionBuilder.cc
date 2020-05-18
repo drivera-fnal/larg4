@@ -33,7 +33,7 @@
 //  devired from G4BertiniPiKBuilder
 //
 // Modified:
-// 02.04.2009 V.Ivanchenko remove add cross section, string builderis reponsible 
+// 02.04.2009 V.Ivanchenko remove add cross section, string builderis reponsible
 // 09.12.2019 D. Rivera copy based on:
 //    geant4.10.03.p03/source/physics_lists/builders/src/G4BertiniPionBuilder.cc
 //
@@ -49,17 +49,17 @@
 #include "Geant4/G4CrossSectionDataSetRegistry.hh"
 
 MyG4BertiniPionBuilder::
-MyG4BertiniPionBuilder() 
+MyG4BertiniPionBuilder()
  {
    thePiData = (G4PiNuclearCrossSection*)G4CrossSectionDataSetRegistry::Instance()->GetCrossSectionDataSet(G4PiNuclearCrossSection::Default_Name());
    theMin = 0*GeV;
    theMax = 9.9*GeV;
    theModel = new MyG4CascadeInterface;
    theModel->SetMinEnergy(theMin);
-   theModel->SetMaxEnergy(theMax); 
+   theModel->SetMaxEnergy(theMax);
  }
 
-MyG4BertiniPionBuilder::~MyG4BertiniPionBuilder() 
+MyG4BertiniPionBuilder::~MyG4BertiniPionBuilder()
 {
 }
 
@@ -82,4 +82,4 @@ Build(G4PionMinusInelasticProcess * aP)
 void MyG4BertiniPionBuilder::
 Build(G4HadronElasticProcess * ) {}
 
-         
+

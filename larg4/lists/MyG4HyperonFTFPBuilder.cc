@@ -29,7 +29,7 @@
 // ClassName:   MyG4HyperonFTFPBuilder
 //
 // Author: 2012 G.Folger
-//    Implementation started from G4HyperonLHEPBuilder.  
+//    Implementation started from G4HyperonLHEPBuilder.
 //
 // Modified:
 // 30.03.2020 D. Rivera copy based on:
@@ -44,28 +44,28 @@
 #include "Geant4/G4ParticleTable.hh"
 #include "Geant4/G4ProcessManager.hh"
 #include "Geant4/G4CrossSectionDataSetRegistry.hh"
-  
-  
-MyG4HyperonFTFPBuilder::MyG4HyperonFTFPBuilder(): 
+
+
+MyG4HyperonFTFPBuilder::MyG4HyperonFTFPBuilder():
  theLambdaInelastic(0),
  theAntiLambdaInelastic(0),
  theSigmaMinusInelastic(0),
  theAntiSigmaMinusInelastic(0),
- theSigmaPlusInelastic(0), 
- theAntiSigmaPlusInelastic(0), 
- theXiZeroInelastic(0), 
+ theSigmaPlusInelastic(0),
+ theAntiSigmaPlusInelastic(0),
+ theXiZeroInelastic(0),
  theAntiXiZeroInelastic(0),
- theXiMinusInelastic(0), 
+ theXiMinusInelastic(0),
  theAntiXiMinusInelastic(0),
- theOmegaMinusInelastic(0), 
- theAntiOmegaMinusInelastic(0), 
+ theOmegaMinusInelastic(0),
+ theAntiOmegaMinusInelastic(0),
  wasActivated(false)
 {
 
 // Hyperon : Bertini at low energies, then FTFP
 
   HyperonFTFP = new G4TheoFSGenerator("FTFP");
-  
+
   HyperonFTFP->SetMinEnergy( 2.*GeV );
   HyperonFTFP->SetMaxEnergy( 100.*TeV );
 
@@ -77,13 +77,13 @@ MyG4HyperonFTFPBuilder::MyG4HyperonFTFPBuilder():
 
   HyperonFTFP->SetTransport(theCascade);
   HyperonFTFP->SetHighEnergyGenerator(theStringModel);
-  
+
   theBertini = new MyG4CascadeInterface;
   //<--theBertini = new G4CascadeInterface;
   theBertini->SetMinEnergy( 0.*GeV );
   theBertini->SetMaxEnergy( 6.*GeV );
 
-// AntiHyperons: Use FTFP for full energy range, starting at 0.  
+// AntiHyperons: Use FTFP for full energy range, starting at 0.
 
   AntiHyperonFTFP = new G4TheoFSGenerator("FTFP");
   AntiHyperonFTFP->SetMinEnergy( 0.*GeV );
@@ -103,7 +103,7 @@ MyG4HyperonFTFPBuilder::~MyG4HyperonFTFPBuilder()
   delete theStringDecay;
   delete theLund;
   //delete AntiHyperonFTFP;
-  /*  
+  /*
   if (wasActivated) {
      delete theLambdaInelastic;
      delete theAntiLambdaInelastic;
@@ -117,8 +117,8 @@ MyG4HyperonFTFPBuilder::~MyG4HyperonFTFPBuilder()
      delete theAntiXiZeroInelastic;
      delete theOmegaMinusInelastic;
      delete theAntiOmegaMinusInelastic;
-  } 
-  */  
+  }
+  */
 }
 
 void MyG4HyperonFTFPBuilder::Build()
@@ -133,15 +133,15 @@ void MyG4HyperonFTFPBuilder::Build()
   theLambdaInelastic->AddDataSet(theCHIPSInelastic);
   aProcMan = G4Lambda::Lambda()->GetProcessManager();
   aProcMan->AddDiscreteProcess(theLambdaInelastic);
-  
+
   // AntiLambda
   theAntiLambdaInelastic = new G4AntiLambdaInelasticProcess();
   theAntiLambdaInelastic->RegisterMe(AntiHyperonFTFP);
   theAntiLambdaInelastic->AddDataSet(theCHIPSInelastic);
-  
+
   aProcMan = G4AntiLambda::AntiLambda()->GetProcessManager();
   aProcMan->AddDiscreteProcess(theAntiLambdaInelastic);
-    
+
   // SigmaMinus
   theSigmaMinusInelastic = new G4SigmaMinusInelasticProcess();
   theSigmaMinusInelastic->RegisterMe(theBertini);

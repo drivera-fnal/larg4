@@ -267,7 +267,7 @@ G4bool MyG4IntraNucleiCascader::initialize(G4InuclParticle* bullet,
                                          G4InuclParticle* target) {
   if (verboseLevel>1)
     G4cout << " >>> MyG4IntraNucleiCascader::initialize " << G4endl;
-  
+
   // Configure processing modules
   theRecoilMaker->setTolerance(small_ekin);
 
@@ -279,17 +279,17 @@ G4bool MyG4IntraNucleiCascader::initialize(G4InuclParticle* bullet,
     G4cout << *interCase.getBullet() << G4endl
            << *interCase.getTarget() << G4endl;
   }
-  
+
   // Bullet may be nucleus or simple particle
   bnuclei = dynamic_cast<G4InuclNuclei*>(interCase.getBullet());
   bparticle = dynamic_cast<G4InuclElementaryParticle*>(interCase.getBullet());
-  
+
   if (!bnuclei && !bparticle) {
     G4cerr << " MyG4IntraNucleiCascader: projectile is not a valid particle."
            << G4endl;
     return false;
   }
-  
+
   // Target _must_ be nucleus
   tnuclei = dynamic_cast<G4InuclNuclei*>(interCase.getTarget());
   if (!tnuclei) {
@@ -297,21 +297,21 @@ G4bool MyG4IntraNucleiCascader::initialize(G4InuclParticle* bullet,
       G4cerr << " Target is not a nucleus.  Abandoning." << G4endl;
     return false;
   }
-  
+
   model->generateModel(tnuclei);
   coulombBarrier = 0.00126*tnuclei->getZ() / (1.+G4cbrt(tnuclei->getA()));
 
   // Energy/momentum conservation usually requires a recoiling nuclear fragment
   // This cut will be increased on each "itry" if momentum could not balance.
   minimum_recoil_A = 0.;
-  
+
   if (verboseLevel > 3) {
     G4LorentzVector momentum_in = bullet->getMomentum() + target->getMomentum();
     G4cout << " intitial momentum  E " << momentum_in.e() << " Px "
            << momentum_in.x() << " Py " << momentum_in.y() << " Pz "
            << momentum_in.z() << G4endl;
   }
-  
+
   return true;
 }
 
@@ -322,7 +322,7 @@ void MyG4IntraNucleiCascader::newCascade(G4int itry) {
     G4cout << " IntraNucleiCascader itry " << itry << " inter_case "
            << interCase.code() << G4endl;
   }
-  
+
   model->reset();                       // Start new cascade process
   output.reset();
   new_cascad_particles.clear();
@@ -346,29 +346,29 @@ void MyG4IntraNucleiCascader::setupCascade() {
     if (verboseLevel > 3)
       G4cout << " bparticle charge " << bparticle->getCharge()
              << " baryon number " << bparticle->baryon() << G4endl;
-    
+
     cascad_particles.push_back(model->initializeCascad(bparticle));
   } else {                              // nuclei with nuclei
     G4int ab = bnuclei->getA();
     G4int zb = bnuclei->getZ();
-    
+
     MyG4NucleiModel::modelLists all_particles;    // Buffer to receive lists
     model->initializeCascad(bnuclei, tnuclei, all_particles);
-    
+
     cascad_particles = all_particles.first;
     output.addOutgoingParticles(all_particles.second);
-    
+
     if (cascad_particles.size() == 0) { // compound nuclei
       G4int i;
-      
+
       for (i = 0; i < ab; i++) {
         G4int knd = i < zb ? 1 : 2;
         theExitonConfiguration.incrementQP(knd);
       };
-      
+
       G4int ihn = G4int(2 * (ab-zb) * inuclRndm() + 0.5);
       G4int ihz = G4int(2 * zb * inuclRndm() + 0.5);
-      
+
       for (i = 0; i < ihn; i++) theExitonConfiguration.incrementHoles(2);
       for (i = 0; i < ihz; i++) theExitonConfiguration.incrementHoles(1);
     }
@@ -385,7 +385,7 @@ void MyG4IntraNucleiCascader::generateCascade() {
   G4int iloop = 0;
   while (!cascad_particles.empty() && !model->empty()) {
     iloop++;
-    
+
     if (verboseLevel > 2) {
       G4cout << " Iteration " << iloop << ": Number of cparticles "
              << cascad_particles.size() << " last one: \n"
@@ -428,18 +428,18 @@ void MyG4IntraNucleiCascader::generateCascade() {
              << new_cascad_particles.size() << G4endl
              << " Discarding last cparticle from list " << G4endl;
     }
-    
+
     cascad_particles.pop_back();
-    
+
     // handle the result of a new step
-    
+
     if (new_cascad_particles.size() == 1) { // last particle goes without interaction
       const G4CascadParticle& currentCParticle = new_cascad_particles[0];
-      
+
       if (model->stillInside(currentCParticle)) {
         if (verboseLevel > 3)
           G4cout << " particle still inside nucleus " << G4endl;
-        
+
         if (currentCParticle.getNumberOfReflections() < reflection_cut &&
             model->worthToPropagate(currentCParticle)) {
           if (verboseLevel > 3) G4cout << " continue reflections " << G4endl;
@@ -447,32 +447,32 @@ void MyG4IntraNucleiCascader::generateCascade() {
         } else {
           processTrappedParticle(currentCParticle);
         }       // reflection or exciton
-        
+
       } else { // particle about to leave nucleus - check for Coulomb barrier
         if (verboseLevel > 3) G4cout << " possible escape " << G4endl;
-        
+
         const G4InuclElementaryParticle& currentParticle =
           currentCParticle.getParticle();
-        
+
         G4double KE = currentParticle.getKineticEnergy();
         G4double mass = currentParticle.getMass();
         G4double Q = currentParticle.getCharge();
-        
+
         if (verboseLevel > 3)
           G4cout << " KE " << KE << " barrier " << Q*coulombBarrier << G4endl;
-        
+
         if (KE < Q*coulombBarrier) {
           // Calculate barrier penetration
-          G4double CBP = 0.0; 
-          
+          G4double CBP = 0.0;
+
           // if (KE > 0.0001) CBP = std::exp(-0.00126*tnuclei->getZ()*0.25*
           //   (1./KE - 1./coulombBarrier));
           if (KE > 0.0001) CBP = G4Exp(-0.0181*0.5*tnuclei->getZ()*
                                        (1./KE - 1./coulombBarrier)*
                                        std::sqrt(mass*(coulombBarrier-KE)) );
-          
+
           if (G4UniformRand() < CBP) {
-            if (verboseLevel > 3) 
+            if (verboseLevel > 3)
               G4cout << " tunneled\n" << currentParticle << G4endl;
 
             // Tunnelling through barrier leaves KE unchanged
@@ -482,35 +482,35 @@ void MyG4IntraNucleiCascader::generateCascade() {
           }
         } else {
           output.addOutgoingParticle(currentParticle);
-          
+
           if (verboseLevel > 3)
             G4cout << " Goes out\n" << output.getOutgoingParticles().back()
                    << G4endl;
         }
-      } 
-    } else { // interaction 
+      }
+    } else { // interaction
       if (verboseLevel > 3)
         G4cout << " interacted, adding new to list " << G4endl;
-      
+
       cascad_particles.insert(cascad_particles.end(),
                               new_cascad_particles.begin(),
                               new_cascad_particles.end());
-      
+
       std::pair<G4int, G4int> holes = model->getTypesOfNucleonsInvolved();
       if (verboseLevel > 3)
         G4cout << " adding new exciton holes " << holes.first << ","
                << holes.second << G4endl;
-      
+
       theExitonConfiguration.incrementHoles(holes.first);
-      
+
       if (holes.second > 0)
         theExitonConfiguration.incrementHoles(holes.second);
     }           // if (new_cascad_particles ...
-    
+
     // Evaluate nuclear residue
     theRecoilMaker->collide(interCase.getBullet(), interCase.getTarget(),
                             output, cascad_particles);
-    
+
     G4double aresid = theRecoilMaker->getRecoilA();
     if (verboseLevel > 2) {
       G4cout << " cparticles remaining " << cascad_particles.size()
@@ -519,7 +519,7 @@ void MyG4IntraNucleiCascader::generateCascade() {
              << model->getNumberOfProtons() << " p "
              << " residual fragment A " << aresid << G4endl;
     }
-    
+
     if (aresid <= minimum_recoil_A) return;     // Must have minimum fragment
   }     // while cascade-list and model
 }
@@ -569,50 +569,50 @@ G4bool MyG4IntraNucleiCascader::finishCascade() {
              << zfin << G4endl;
     return false;                               // Discard event and try again
   }
-  
+
   const G4LorentzVector& presid = theRecoilMaker->getRecoilMomentum();
-  
+
   if (verboseLevel > 1) {
     G4cout << "  afin " << afin << " zfin " << zfin <<  G4endl;
   }
-  
+
   if (afin == 0) return true;           // Whole event fragmented, exit
-  
+
   if (afin == 1) {                      // Add bare nucleon to particle list
     G4int last_type = (zfin==1) ? 1 : 2;        // proton=1, neutron=2
-    
+
     G4double mass = G4InuclElementaryParticle::getParticleMass(last_type);
     G4double mres = presid.m();
-    
+
     // Check for sensible kinematics
     if (mres-mass < -small_ekin) {              // Insufficient recoil energy
       if (verboseLevel > 2) G4cerr << " unphysical recoil nucleon" << G4endl;
       return false;
     }
-    
+
     if (mres-mass > small_ekin) {               // Too much extra energy
       if (verboseLevel > 2)
         G4cerr << " extra energy with recoil nucleon" << G4endl;
-      
+
       // FIXME:  For now, we add the nucleon as unbalanced, and let
       //           "SetOnShell" fudge things.  This should be abandoned.
     }
-    
-    G4InuclElementaryParticle last_particle(presid, last_type, 
+
+    G4InuclElementaryParticle last_particle(presid, last_type,
                                             G4InuclParticle::INCascader);
-    
+
     if (verboseLevel > 3) {
       G4cout << " adding recoiling nucleon to output list\n"
              << last_particle  << G4endl;
     }
-    
+
     output.addOutgoingParticle(last_particle);
 
     // Update recoil to include residual nucleon
     theRecoilMaker->collide(interCase.getBullet(), interCase.getTarget(),
                             output);
   }
-  
+
   // Process recoil fragment for consistency, exit or reject
   if (output.numberOfOutgoingParticles() == 1) {
     G4double Eex = theRecoilMaker->getRecoilExcitation();
@@ -621,7 +621,7 @@ G4bool MyG4IntraNucleiCascader::finishCascade() {
         G4cout << " quasi-elastic scatter with " << Eex << " MeV recoil"
                << G4endl;
       }
-      
+
       theRecoilMaker->setRecoilExcitation(Eex=0.);
       if (verboseLevel > 3) {
         G4cout << " Eex reset to " << theRecoilMaker->getRecoilExcitation()
@@ -629,32 +629,32 @@ G4bool MyG4IntraNucleiCascader::finishCascade() {
       }
     }
   }
-  
+
   if (theRecoilMaker->goodNucleus()) {
     theRecoilMaker->addExcitonConfiguration(theExitonConfiguration);
-    
+
     G4Fragment* recoilFrag = theRecoilMaker->makeRecoilFragment();
     if (!recoilFrag) {
       G4cerr << "Got null pointer for recoil fragment!" << G4endl;
       return false;
     }
-    
+
     if (verboseLevel > 2)
       G4cout << " adding recoil fragment to output list" << G4endl;
 
     output.addRecoilFragment(*recoilFrag);
   }
-  
+
   // Put final-state particles in "leading order" for return
   std::vector<G4InuclElementaryParticle>& opart = output.getOutgoingParticles();
   std::sort(opart.begin(), opart.end(), G4ParticleLargerEkin());
-  
+
   // Adjust final state to balance momentum and energy if necessary
   if (theRecoilMaker->wholeEvent() || theRecoilMaker->goodNucleus()) {
     output.setVerboseLevel(verboseLevel);
     output.setOnShell(interCase.getBullet(), interCase.getTarget());
     output.setVerboseLevel(0);
-    
+
     if (output.acceptable()) return true;
     else if (verboseLevel>2) G4cerr << " Cascade setOnShell failed." << G4endl;
   }
@@ -675,7 +675,7 @@ G4bool MyG4IntraNucleiCascader::finishCascade() {
 
 // Transfer finished cascade to return buffer
 
-void 
+void
 MyG4IntraNucleiCascader::finalize(G4int itry, G4InuclParticle* bullet,
                                 G4InuclParticle* target,
                                 G4CollisionOutput& globalOutput) {
@@ -689,7 +689,7 @@ MyG4IntraNucleiCascader::finalize(G4int itry, G4InuclParticle* bullet,
   } else if (verboseLevel) {
     G4cout << " IntraNucleiCascader output after trials " << itry << G4endl;
   }
-  
+
   // Copy final generated cascade to output buffer for return
   globalOutput.add(output);
 }
@@ -697,7 +697,7 @@ MyG4IntraNucleiCascader::finalize(G4int itry, G4InuclParticle* bullet,
 
 // Create simple nucleus from rescattering target
 
-G4InuclParticle* 
+G4InuclParticle*
 MyG4IntraNucleiCascader::createTarget(G4V3DNucleus* theNucleus) {
 
   if (verboseLevel>1)
@@ -705,7 +705,7 @@ MyG4IntraNucleiCascader::createTarget(G4V3DNucleus* theNucleus) {
 
   G4int theNucleusA = theNucleus->GetMassNumber();
   G4int theNucleusZ = theNucleus->GetCharge();
-  
+
   if (theNucleusA > 1) {
     if (!nucleusTarget) nucleusTarget = new G4InuclNuclei;      // Just in case
     nucleusTarget->fill(0., theNucleusA, theNucleusZ, 0., G4InuclParticle::target); //set model
@@ -721,7 +721,7 @@ MyG4IntraNucleiCascader::createTarget(G4V3DNucleus* theNucleus) {
 
 // Copy existing (rescattering) cascade for propagation
 
-void 
+void
 MyG4IntraNucleiCascader::preloadCascade(G4V3DNucleus* theNucleus,
                                       G4KineticTrackVector* theSecondaries) {
   if (verboseLevel > 1)
@@ -761,7 +761,7 @@ void MyG4IntraNucleiCascader::copyWoundedNucleus(G4V3DNucleus* theNucleus) {
                theExitonConfiguration.protonHoles, &hitNucleons);
 }
 
-void 
+void
 MyG4IntraNucleiCascader::copySecondaries(G4KineticTrackVector* secondaries) {
   if (verboseLevel > 1)
     G4cout << " >>> MyG4IntraNucleiCascader::copySecondaries" << G4endl;
@@ -858,7 +858,7 @@ void MyG4IntraNucleiCascader::releaseSecondary(const G4KineticTrack* ktrack) {
   }
 }
 
-  
+
 // Convert particles which cannot escape into excitons (or eject/decay them)
 
 void MyG4IntraNucleiCascader::
@@ -870,7 +870,7 @@ processTrappedParticle(const G4CascadParticle& trapped) {
 
   G4int xtype = trappedP.type();
   if (verboseLevel > 3) G4cout << " exciton of type " << xtype << G4endl;
-  
+
   if (trappedP.nucleon()) {     // normal exciton (proton or neutron)
     theExitonConfiguration.incrementQP(xtype);
     if (theCascadeHistory) theCascadeHistory->DropEntry(trapped);
@@ -889,7 +889,7 @@ processTrappedParticle(const G4CascadParticle& trapped) {
     G4cout << " non-standard should be absorbed, now released\n"
            << trapped << G4endl;
   }
-  
+
   output.addOutgoingParticle(trappedP);
 }
 
@@ -901,7 +901,7 @@ decayTrappedParticle(const G4CascadParticle& trapped) {
   if (verboseLevel > 1)
     G4cout << " >>> MyG4IntraNucleiCascader::decayTrappedParticle" << G4endl;
 
-  if (verboseLevel > 3) 
+  if (verboseLevel > 3)
     G4cout << " unstable must be decayed in flight" << G4endl;
 
   const G4InuclElementaryParticle& trappedP = trapped.getParticle();

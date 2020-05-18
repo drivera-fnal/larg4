@@ -89,7 +89,7 @@ protected:
   // Looks for non-gamma final state in photonuclear or leptonuclear
   G4bool photonuclearOkay(G4CollisionOutput& checkOutput) const;
 
-private: 
+private:
   MyG4ElementaryParticleCollider* theElementaryParticleCollider;
   MyG4IntraNucleiCascader* theIntraNucleiCascader;
 
@@ -102,7 +102,7 @@ private:
   // Copying of modules is forbidden
   MyG4InuclCollider(const MyG4InuclCollider&);
   MyG4InuclCollider& operator=(const MyG4InuclCollider&);
-};        
+};
 
 #endif /* MYG4INUCL_COLLIDER_HH */
 

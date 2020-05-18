@@ -124,11 +124,11 @@ G4int MyG4CascadeHistory::AddVertex(G4CascadParticle& cpart,
   return id;
 }
 
-void 
+void
 MyG4CascadeHistory::FillDaughters(G4int iEntry, std::vector<G4CascadParticle>& daug) {
   G4int nDaug = (G4int)daug.size();
 
-  if (verboseLevel>1) 
+  if (verboseLevel>1)
     G4cout << " >>> MyG4CascadeHistory::FillDaughters " << iEntry << G4endl;
 
   // NOTE:  Cannot use reference to element, as push_back can invalidate refs!
@@ -161,12 +161,12 @@ G4int MyG4CascadeHistory::AddEntry(G4CascadParticle& cpart) {
 
   G4int id = cpart.getHistoryId();
   if (id < size()) {
-    if (verboseLevel>2) 
+    if (verboseLevel>2)
       G4cout << " AddEntry updating " << id << " " << &theHistory[id] << G4endl;
     theHistory[id].cpart = cpart;		// Copies kinematics
   } else {
     theHistory.push_back(HistoryEntry(cpart));
-    if (verboseLevel>2) 
+    if (verboseLevel>2)
       G4cout << " AddEntry creating " << id << " " << &theHistory.back() << G4endl;
   }
 
@@ -190,7 +190,7 @@ G4int MyG4CascadeHistory::AddEntry(G4CascadParticle& cpart) {
 void MyG4CascadeHistory::DropEntry(const G4CascadParticle& cpart) {
   if (verboseLevel>1) G4cout << " >>> MyG4CascadeHistory::DropEntry" << G4endl;
 
-  
+
   G4int id = cpart.getHistoryId();	// Particle must appear in history
   if (id>=0) theHistory[id].n = -1;	// Special flag for absorbed particle
 }
@@ -223,7 +223,7 @@ void MyG4CascadeHistory::Print(std::ostream& os) const {
      << std::endl;
 
   for (G4int i=0; i<size(); i++) {
-    if (!PrintingDone(i)) PrintEntry(os, i);    
+    if (!PrintingDone(i)) PrintEntry(os, i);
   }
 }
 
@@ -269,7 +269,7 @@ PrintLineBreak() {
 }
 
 // Add single-line report for particle, along with daughters
-  
+
 void MyG4CascadeHistory::PrintEntry(std::ostream& os, G4int iEntry) const {
   if (iEntry >= size()) return;			// Skip nonexistent entry
   if (PrintingDone(iEntry)) return;		// Skip entry already reported
@@ -322,7 +322,7 @@ GuessTarget(const MyG4CascadeHistory::HistoryEntry& entry) const {
 
   for (G4int i=0; i<entry.n; i++) {
     const G4CascadParticle& cdaug = theHistory[entry.dId[i]].cpart;
-    if (verboseLevel>3) 
+    if (verboseLevel>3)
       G4cout << "cdaug " << i << " ID " << entry.dId[i] << ": " << cdaug;
 
     targetB += cdaug.getParticle().baryon();

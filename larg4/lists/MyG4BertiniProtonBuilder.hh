@@ -39,7 +39,7 @@
 //----------------------------------------------------------------------------
 //
 #ifndef MyG4BertiniProtonBuilder_h
-#define MyG4BertiniProtonBuilder_h 
+#define MyG4BertiniProtonBuilder_h
 
 #include "Geant4/globals.hh"
 
@@ -49,26 +49,26 @@
 #include "Geant4/G4ProtonInelasticProcess.hh"
 #include "Geant4/G4VProtonBuilder.hh"
 
-//#include "Geant4/G4CascadeInterface.hh"   
-#include "MyG4CascadeInterface.hh"   
+//#include "Geant4/G4CascadeInterface.hh"
+#include "MyG4CascadeInterface.hh"
 
 class MyG4BertiniProtonBuilder : public G4VProtonBuilder
 {
-  public: 
+  public:
     MyG4BertiniProtonBuilder();
     virtual ~MyG4BertiniProtonBuilder();
 
-  public: 
+  public:
     virtual void Build(G4HadronElasticProcess * aP);
     virtual void Build(G4ProtonInelasticProcess * aP);
-    
+
     void SetMinEnergy(G4double aM) {theMin = aM;}
     void SetMaxEnergy(G4double aM) {theMax = aM;}
 
   private:
 
-    //<--G4CascadeInterface * theModel;    
-    MyG4CascadeInterface * theModel;    
+    //<--G4CascadeInterface * theModel;
+    MyG4CascadeInterface * theModel;
     G4double theMin;
     G4double theMax;
 

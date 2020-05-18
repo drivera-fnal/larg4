@@ -73,7 +73,7 @@ public:
   void handleWatcherStatistics();
   void printResultsNtuple();
 
-private: 
+private:
 
   G4int verboseLevel;
   G4int bulletPDG;
@@ -103,6 +103,6 @@ private:
   G4bool withNuclei;
 
   std::map<G4int, std::pair<std::string,G4int> > modelCounterMap;
-};        
+};
 
 #endif // MYG4ANALYSER_HH
