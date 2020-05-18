@@ -45,9 +45,9 @@ MyG4Analyser2::MyG4Analyser2()
     PionNumber(0.0), PhotonNumber(0.0),
     NucleonKinEnergy(0.0), ProtonKinEnergy(0.0),
     NeutronKinEnergy(0.0), PionKinEnergy(0.0), PhotonKinEnergy(0.0),
-    ExitationEnergy(0.0), OutgoingNuclei(0.0), fissy_prob(0.0), PionPl(0.0),
+    ExitationEnergy(0.0), OutgoingParticles(0.0), OutgoingNuclei(0.0), fissy_prob(0.0), PionPl(0.0),
     PionMin(0.0), Pion0(0.0), A(0.0), Z(0.0),
-    inel_csec(0.0), withNuclei(true) {
+    inel_csec(0.0) {
     // -- enable analyzer with Nuclei enabled
   if (verboseLevel > 3) {
     G4cout << " >>> MyG4Analyser2::MyG4Analyser2" << G4endl;
@@ -109,14 +109,13 @@ printLineBreak() {
 
 }
 
-void MyG4Analyser2::setInelCsec(G4double csec, G4bool withn) {
+void MyG4Analyser2::setInelCsec(G4double csec) {
 
   if (verboseLevel > 3) {
     G4cout << " >>> MyG4Analyser2::setInelCsec" << G4endl;
   }
 
   inel_csec = csec; // mb
-  withNuclei = withn;
 
   if (verboseLevel > 3) {
     G4cout << " total inelastic " << inel_csec << G4endl;
@@ -141,15 +140,15 @@ void MyG4Analyser2::try_watchers(G4int a, G4int z, G4bool if_nucl) {
     G4cout << " >>> MyG4Analyser2::try_watchers" << G4endl;
   }
 
-  for (G4int iw = 0; iw < G4int(ana_watchers.size()); iw++) { 
+  for (G4int iw = 0; iw < G4int(ana_watchers.size()); iw++) {
 
     if (if_nucl) {
 
-      if (ana_watchers[iw].look_forNuclei()) ana_watchers[iw].watch(a, z); 
+      if (ana_watchers[iw].look_forNuclei()) ana_watchers[iw].watch(a, z);
 
     } else {
 
-      if (!ana_watchers[iw].look_forNuclei()) ana_watchers[iw].watch(a, z); 
+      if (!ana_watchers[iw].look_forNuclei()) ana_watchers[iw].watch(a, z);
     }
   }
 }
@@ -165,152 +164,100 @@ void MyG4Analyser2::analyse(const G4CollisionOutput& output, const G4InuclPartic
   bulletType = bullet.getDefinition()->GetParticleName();
   bulletPDG  = bullet.getDefinition()->GetPDGEncoding();
 
-  const std::vector<G4InuclElementaryParticle>& particles =
-    output.getOutgoingParticles();
-  Multiplicity += particles.size();
+  const std::vector<G4InuclElementaryParticle>& particles = output.getOutgoingParticles();
+  const std::vector<G4InuclNuclei>& nuclei = output.getOutgoingNuclei();
+
+  OutgoingParticles = particles.size();
+  OutgoingNuclei = nuclei.size();
+  Multiplicity = OutgoingParticles + OutgoingNuclei;
 
   // -- Add entry for primary bullet particle  (ostream, partile, mId, nDaughters
-  if (outputSet) printBulletNtuple(outFile, bullet, 0, particles.size());
+  if (outputSet) printBulletNtuple(outFile, bullet, 0, Multiplicity);
 
 
-  if (withNuclei) { // -- include nuclei analysis
-    const std::vector<G4InuclNuclei>& nuclei = output.getOutgoingNuclei();
+  //if (withNuclei) { // -- include nuclei analysis. Always track nuclei..
 
-    //    if (nuclei.size() >= 0) {
-    if (nuclei.size() > 0) { // -- if there are no nuclei.. this gets skipped?
+  //    if (nuclei.size() >= 0) {
+  //if (nuclei.size() > 0) // -- Doesn't matter if there are nuclear fragments or not..
+  //{ // -- if there are no nuclei.. this gets skipped?
 
-      // -- process particles first
-      for (G4int i = 0; i < G4int(particles.size()); i++) {
-        G4int ap = 0;
-        G4int zp = 0;
-        G4InuclParticle::Model model = particles[i].getModel();
-        G4int modelId = (G4int)model;
-        modelCounterMap[modelId].second +=1;
-        if (outputSet) printParticleNtuple(outFile, particles[i], (i+1));
+  // -- process particles first
+  // -- loop over all outgoing particles
+  for (G4int i = 0; i < G4int(particles.size()); i++)
+  {
+    G4int ap = 0;
+    G4int zp = 0;
+    G4InuclParticle::Model model = particles[i].getModel();
+    G4int modelId = (G4int)model;
+    modelCounterMap[modelId].second +=1;
+    if (outputSet) printParticleNtuple(outFile, particles[i], (i+1));
 
-        if (particles[i].nucleon()) { // -- is a nucleon
-          NucleonKinEnergy += particles[i].getKineticEnergy();
+    if (particles[i].nucleon()) { // -- is a nucleon
+      NucleonKinEnergy += particles[i].getKineticEnergy();
 
-          if (particles[i].type() == 1) {
-            zp = 1;
-            ap = 1;
-            ProtonNumber += 1.0;
-            ProtonKinEnergy += particles[i].getKineticEnergy();
+      if (particles[i].type() == 1) {
+        zp = 1;
+        ap = 1;
+        ProtonNumber += 1.0;
+        ProtonKinEnergy += particles[i].getKineticEnergy();
 
-          } else {
-            ap = 1;
-            zp = 0;
-            NeutronNumber += 1.0;
-            NeutronKinEnergy += particles[i].getKineticEnergy();
-          };  
-
-        } else if (particles[i].pion()) {
-          PionKinEnergy += particles[i].getKineticEnergy();
-          PionNumber += 1.0;
-          ap = 0;
-
-          if (particles[i].type() == 3) {
-            zp = 1;
-            PionPl += 1.0;
-
-          } else if (particles[i].type() == 5) {  
-            zp = -1;
-            PionMin += 1.0;
-
-          } else if (particles[i].type() == 7) { 
-            zp = 0;
-            Pion0 += 1.0;
-          };
-        } else if (particles[i].isPhoton()) {
-          PhotonKinEnergy += particles[i].getKineticEnergy();
-          PhotonNumber += 1.0;
-          ap = 0;
-          zp = 0;
-        }; // -- 
-        try_watchers(ap, zp, false);
+      } else {
+        ap = 1;
+        zp = 0;
+        NeutronNumber += 1.0;
+        NeutronKinEnergy += particles[i].getKineticEnergy();
       };
 
-      G4int nbig = 0;
-      OutgoingNuclei += nuclei.size();
+    } else if (particles[i].pion()) {
+      PionKinEnergy += particles[i].getKineticEnergy();
+      PionNumber += 1.0;
+      ap = 0;
 
-      for (G4int in = 0; in < G4int(nuclei.size()); in++)
-      {
-        ExitationEnergy += nuclei[in].getExitationEnergy();
+      if (particles[i].type() == 3) {
+        zp = 1;
+        PionPl += 1.0;
 
-        G4int a = nuclei[in].getA();
-        G4int z = nuclei[in].getZ();
+      } else if (particles[i].type() == 5) {
+        zp = -1;
+        PionMin += 1.0;
 
-        if (in == 0) {  // -- why only the first entry in the nuclei vector?
-          A = a;
-          Z = z;
-        };
-
-        if (a > 10) nbig++;
-        try_watchers(a, z, true);
-
-        if (outputSet) printNucleiNtuple(outFile, nuclei[in], (in+1));
+      } else if (particles[i].type() == 7) {
+        zp = 0;
+        Pion0 += 1.0;
       };
+    } else if (particles[i].isPhoton()) {
+      PhotonKinEnergy += particles[i].getKineticEnergy();
+      PhotonNumber += 1.0;
+      ap = 0;
+      zp = 0;
+    }; // --
+    try_watchers(ap, zp, false);
+  };
 
-      if (nbig > 1) fissy_prob += 1.0;
-      eventNumber += 1.0;
-      /*
-      const std::vector<G4InuclElementaryParticle>& particles =
-        output.getOutgoingParticles();
-      Multiplicity += particles.size();
+  G4int nbig = 0;
+  for (G4int in = 0; in < G4int(nuclei.size()); in++)
+  {
+    G4InuclParticle::Model model = nuclei[in].getModel();
+    G4int modelId = (G4int)model;
+    modelCounterMap[modelId].second +=1;
+    ExitationEnergy += nuclei[in].getExitationEnergy();
 
-      // -- Add entry for primary bullet particle  (ostream, partile, mId, nDaughters
-      if (outputSet) printBulletNtuple(outFile, bullet, 0, particles.size());
-      */
-      // -- loop over all outgoing particles
+    G4int a = nuclei[in].getA();
+    G4int z = nuclei[in].getZ();
 
-    } else {
-      G4cout << " >> MyG4Analyser2::analyse "
-             << "withNuclei = true, but vector of outgoing nuclei is empty..." << G4endl;
+    if (in == 0) {  // -- why only the first entry in the nuclei vector? Biggest?
+      A = a;
+      Z = z;
     };
 
-  } else { // -- don't do nuclei analysis
-    eventNumber += 1.0;
-    /*
-    const std::vector<G4InuclElementaryParticle>& particles =
-      output.getOutgoingParticles();
-    Multiplicity += particles.size();
-    */
-    for (G4int i = 0; i < G4int(particles.size()); i++) {
-      G4InuclParticle::Model model = particles[i].getModel();
-      G4int modelId = (G4int)model;
-      modelCounterMap[modelId].second +=1;
+    if (a > 10) nbig++;
+    try_watchers(a, z, true);
 
-      if (particles[i].nucleon()) {
-        NucleonKinEnergy += particles[i].getKineticEnergy();
+    if (outputSet) printNucleiNtuple(outFile, nuclei[in], (in+1));
+  };
 
-        if (particles[i].type() == 1) {
-          ProtonNumber += 1.0;
-          ProtonKinEnergy += particles[i].getKineticEnergy();
-
-        } else {
-          NeutronNumber += 1.0;
-          NeutronKinEnergy += particles[i].getKineticEnergy();
-        }
-
-      } else if (particles[i].pion()) {
-        PionNumber += 1.0;
-        PionKinEnergy += particles[i].getKineticEnergy();
-
-        if (particles[i].type() == 3) {
-          PionPl += 1.0;
-
-        } else if (particles[i].type() == 5) {  
-          PionMin += 1.0;
-
-        } else if (particles[i].type() == 7) { 
-          Pion0 += 1.0;
-        }
-      } else if (particles[i].isPhoton()) {
-        PhotonNumber +=1.0;
-        PhotonKinEnergy += particles[i].getKineticEnergy();
-      }
-    }
-  }
+  if (nbig > 1) fissy_prob += 1.0;
+  eventNumber += 1.0;
 }
 
 void MyG4Analyser2::printResultsSimple() {
@@ -331,15 +278,13 @@ void MyG4Analyser2::printResultsSimple() {
          << "  photon number " << PhotonNumber << G4endl
          << "  total photon Ekin " << PhotonKinEnergy << G4endl;
 
-  if (withNuclei) {
-    G4cout                 
+    G4cout
       << "  total Exitation Energy " << ExitationEnergy << G4endl
       << "  num of fragments " << OutgoingNuclei << G4endl;
 
-    G4cout 
+    G4cout
       << " fission prob. " << fissy_prob << " c.sec "
       << inel_csec * fissy_prob << G4endl;
-  }
 }
 
 void MyG4Analyser2::printResults() {
@@ -364,11 +309,10 @@ void MyG4Analyser2::printResults() {
          << "  pi0 number " << Pion0 << G4endl
          << "  photon number " << PhotonNumber << G4endl
          << "  total photon Ekin " << PhotonKinEnergy << G4endl;
-                   
-  if (withNuclei) {
+
     G4cout
-      << "  A[0] " << A << G4endl                 
-      << "  Z[0] " << Z << G4endl                 
+      << "  A[0] " << A << G4endl
+      << "  Z[0] " << Z << G4endl
       << "  total excitation Energy " << ExitationEnergy << G4endl
       << "  num of fragments " << OutgoingNuclei << G4endl;
 
@@ -377,7 +321,7 @@ void MyG4Analyser2::printResults() {
       << inel_csec * fissy_prob << G4endl;
 
     handleWatcherStatistics();
-  }
+
   G4cout << "//////////-Model Statistics-//////////" << G4endl;
   for(auto const &[m,info] : modelCounterMap){
     G4cout << "Model " << info.first << " : " << info.second << G4endl;
@@ -414,7 +358,7 @@ void MyG4Analyser2::handleWatcherStatistics() {
       std::pair<G4double, G4double> rat_err = ana_watchers[iw].getAverageRatio();
       averat += rat_err.first;
       ave_err += rat_err.second;
-      gl_chsq += ana_watchers[iw].getChsq();   
+      gl_chsq += ana_watchers[iw].getChsq();
       std::pair<G4double, G4double> cs_err = ana_watchers[iw].getExpCs();
       tot_exper += cs_err.first;
       tot_exper_err += cs_err.second;
@@ -425,7 +369,7 @@ void MyG4Analyser2::handleWatcherStatistics() {
 
       if (iz_checked > 0.0) {
         fgr += ana_watchers[iw].getLhood();
-        checked += iz_checked;    
+        checked += iz_checked;
       };
     };
   };
@@ -434,7 +378,7 @@ void MyG4Analyser2::handleWatcherStatistics() {
     gl_chsq = std::sqrt(gl_chsq) / checked;
     averat /= checked;
     ave_err /= checked;
-    fgr = std::pow(10.0, std::sqrt(fgr / checked)); 
+    fgr = std::pow(10.0, std::sqrt(fgr / checked));
   };
 
   if (verboseLevel > 3) {
@@ -516,13 +460,15 @@ void MyG4Analyser2::printNucleiNtuple(std::ostream& outfile, const G4InuclNuclei
   }
 
   // Create one line of ASCII data.
-  // all bullet particles are considered Generation 0
+  // All nuclei particles considered Gen 2
+  // The Id for nuclear fragments is offset by the number of outgoing elementary particles
+  // Use the x-position to store the excitation energy just because
   outfile <<
     std::setw(11) << particle.getDefinition()->GetPDGEncoding() <<  /*PDG*/
     std::setw(4)  << particle.getModel() <<                         /*Modl*/
-    std::setw(5)  << Id <<                                          /*Id*/
-    std::setw(5)  << -1 <<                                          /*MId*/
-    std::setw(5)  << 0 <<                                           /*Gen*/
+    std::setw(5)  << int(OutgoingParticles+0.01) + Id <<            /*Id*/
+    std::setw(5)  << 0 <<                                           /*MId*/
+    std::setw(5)  << 2 <<                                           /*Gen*/
     std::setw(5)  << 0 <<                                           /*Daug*/
     std::setw(5)  << 3 <<                                           /*Zone*/
     std::setw(5)  << 0 <<                                           /*In*/
@@ -531,7 +477,7 @@ void MyG4Analyser2::printNucleiNtuple(std::ostream& outfile, const G4InuclNuclei
     std::setw(15) << (particle.getMomentum())[0] <<                 /*Px*/
     std::setw(15) << (particle.getMomentum())[1] <<                 /*Py*/
     std::setw(15) << (particle.getMomentum())[2] <<                 /*Pz*/
-    std::setw(15) << -99. <<                                        /*Vx*/
+    std::setw(15) << particle.getExitationEnergy() <<               /*Vx*/
     std::setw(15) << -99. <<                                        /*Vy*/
     std::setw(15) << -99.                                           /*Vz*/
     << std::endl;
@@ -543,13 +489,13 @@ void MyG4Analyser2::printResultsNtuple() {
     G4cout << " >>> MyG4Analyser2::printResultsNtuple" << G4endl;
   }
 
-  // Create one line of ASCII data. 
-  // Several runs should create ntuple for data-analysis 
+  // Create one line of ASCII data.
+  // Several runs should create ntuple for data-analysis
   G4cout <<
     std::setw(15) << bulletPDG <<
     std::setw(15) << bulletKineticEnergy <<
     std::setw(15) << int(eventNumber+0.01) <<
-    std::setw(15) << Multiplicity << 
+    std::setw(15) << Multiplicity <<
     std::setw(15) << ProtonNumber <<
     std::setw(15) << NeutronNumber << " " <<
     std::setw(15) << NucleonKinEnergy << " " <<

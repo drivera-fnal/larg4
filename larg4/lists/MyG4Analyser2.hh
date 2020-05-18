@@ -65,7 +65,7 @@ public:
   MyG4Analyser2();
   void setOutputFile(G4String outFileName);
   void printLineBreak();
-  void setInelCsec(G4double csec, G4bool withn);
+  void setInelCsec(G4double csec);
   void setWatchers(const std::vector<G4NuclWatcher>& watchers);
   void try_watchers(G4int a, G4int z, G4bool if_nucl);
   void analyse(const G4CollisionOutput& output, const G4InuclParticle& bullet);
@@ -77,7 +77,7 @@ public:
   void printParticleNtuple(std::ostream& outfile, const G4InuclElementaryParticle &particle, G4int Id) const;
   void printResultsNtuple();
 
-private: 
+private:
 
   G4int verboseLevel;
   std::ofstream outFile;
@@ -99,6 +99,7 @@ private:
   G4double PionKinEnergy;
   G4double PhotonKinEnergy;
   G4double ExitationEnergy;
+  G4double OutgoingParticles;
   G4double OutgoingNuclei;
 
   G4double fissy_prob;
@@ -111,9 +112,8 @@ private:
 
   std::vector<G4NuclWatcher> ana_watchers;
   G4double inel_csec;
-  G4bool withNuclei;
 
   std::map<G4int, std::pair<std::string,G4int> > modelCounterMap;
-};        
+};
 
 #endif // MYG4ANALYSER2_HH
