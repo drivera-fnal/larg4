@@ -37,7 +37,7 @@
 
 
 #include <algorithm>
-
+#include <fstream> // -- std::ofstream
 // unused const G4bool debug = false;
 
 // Photon variables defined at each step, for use
@@ -99,6 +99,16 @@ namespace larg4 {
     fParentIDMap.clear();
     fMCTIndexMap.clear();
     fCurrentTrackID = sim::NoParticleId;
+
+    // -- test of distinguishing event number in cascadeparticles and outgoing particles
+    std::ofstream outFile, cascadeFile;
+    outFile.open("outgoing_particles.tuple", std::ios::out | std::ios::app );
+    outFile << "Evt: " << getCurrArtEvent()->id().event() << std::endl;
+    outFile.close();
+
+    cascadeFile.open("cascade_particles.tuple", std::ios::out | std::ios::app );
+    cascadeFile << "Evt: " << getCurrArtEvent()->id().event() << std::endl;
+    cascadeFile.close();
    }
 
   //-------------------------------------------------------------
