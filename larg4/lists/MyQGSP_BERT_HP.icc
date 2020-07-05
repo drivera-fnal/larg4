@@ -42,7 +42,8 @@
 // 16.08.2010 H.Kurashige: Remove inclusion of G4ParticleWithCuts
 // 16.10.2012 A.Ribon: Use new default stopping
 // 09.10.2019 D.Rivera Modified for use with larg4
-// 12.10.2019 D.Rivera Added Radioactive Decay Physics
+// 10.12.2019 D.Rivera Added Radioactive Decay Physics
+// 04.07.2020 D.Rivera Rebranded G4StoppingPhysics to incorporate MyG4CascadeInterface
 //
 //----------------------------------------------------------------------------
 //
@@ -63,7 +64,8 @@
 #include "Geant4/G4EmStandardPhysics.hh"
 #include "Geant4/G4EmExtraPhysics.hh"
 #include "Geant4/G4IonPhysics.hh"
-#include "Geant4/G4StoppingPhysics.hh"
+//#include "Geant4/G4StoppingPhysics.hh"
+#include "MyG4StoppingPhysics.hh"
 #include "Geant4/G4HadronElasticPhysicsHP.hh"
 
 #include "Geant4/G4DataQuestionaire.hh"
@@ -98,7 +100,8 @@ template<class T> TMyQGSP_BERT_HP<T>::TMyQGSP_BERT_HP(G4int ver):  T()
   this->RegisterPhysics( new MyG4HadronPhysicsQGSP_BERT_HP(ver));
 
   // Stopping Physics
-  this->RegisterPhysics( new G4StoppingPhysics(ver));
+  //<--this->RegisterPhysics( new G4StoppingPhysics(ver));
+  this->RegisterPhysics( new MyG4StoppingPhysics(ver));
 
   // Ion Physics
   this->RegisterPhysics( new G4IonPhysics(ver));
