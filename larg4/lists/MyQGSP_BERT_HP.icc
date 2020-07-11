@@ -44,6 +44,7 @@
 // 09.10.2019 D.Rivera Modified for use with larg4
 // 10.12.2019 D.Rivera Added Radioactive Decay Physics
 // 04.07.2020 D.Rivera Rebranded G4StoppingPhysics to incorporate MyG4CascadeInterface
+// 05.07.2020 D.Rivera Rebranded G4EmExtraPhysics to incorporate MyG4CascadeInterface
 //
 //----------------------------------------------------------------------------
 //
@@ -62,15 +63,19 @@
 #include "Geant4/G4DecayPhysics.hh"
 #include "Geant4/G4RadioactiveDecayPhysics.hh"
 #include "Geant4/G4EmStandardPhysics.hh"
-#include "Geant4/G4EmExtraPhysics.hh"
 #include "Geant4/G4IonPhysics.hh"
-//#include "Geant4/G4StoppingPhysics.hh"
-#include "MyG4StoppingPhysics.hh"
-#include "Geant4/G4HadronElasticPhysicsHP.hh"
 
-#include "Geant4/G4DataQuestionaire.hh"
-//#include "Geant4/G4HadronPhysicsQGSP_BERT_HP.hh"
+//<--#include "Geant4/G4EmExtraPhysics.hh"
+//<--#include "Geant4/G4StoppingPhysics.hh"
+//<--#include "Geant4/G4HadronPhysicsQGSP_BERT_HP.hh"
+
+#include "MyG4EmExtraPhysics.hh"
+#include "MyG4StoppingPhysics.hh"
 #include "MyG4HadronPhysicsQGSP_BERT_HP.hh"
+
+#include "Geant4/G4HadronElasticPhysicsHP.hh"
+#include "Geant4/G4DataQuestionaire.hh"
+
 
 template<class T> TMyQGSP_BERT_HP<T>::TMyQGSP_BERT_HP(G4int ver):  T()
 {
@@ -86,7 +91,8 @@ template<class T> TMyQGSP_BERT_HP<T>::TMyQGSP_BERT_HP(G4int ver):  T()
   this->RegisterPhysics( new G4EmStandardPhysics(ver) );
 
   // Synchroton Radiation & GN Physics
-  this->RegisterPhysics( new G4EmExtraPhysics(ver) );
+  //<--this->RegisterPhysics( new G4EmExtraPhysics(ver) );
+  this->RegisterPhysics( new MyG4EmExtraPhysics(ver) );
 
   // Decays
   this->RegisterPhysics( new G4DecayPhysics(ver) );
