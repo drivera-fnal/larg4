@@ -53,13 +53,15 @@ namespace larg4 {
     struct ParticleInfo_t {
 
       simb::MCParticle* particle = nullptr;  ///< simple structure representing particle
-      bool              keep = false;        ///< if there was decision to keep
+      bool keep               = false;        ///< if there was decision to keep
+      bool keepFullTrajectory = false;        ///< if there was decision to keep
       /// Index of the particle in the original generator truth record.
       simb::GeneratedParticleIndex_t truthIndex = simb::NoGeneratedParticleIndex;
       /// Resets the information (does not release memory it does not own)
       void clear()
       { particle = nullptr;
         keep = false;
+        keepFullTrajectory = false;
         truthIndex = simb::NoGeneratedParticleIndex;
       }
 
@@ -146,12 +148,20 @@ namespace larg4 {
     sim::ParticleList*       fparticleList;          ///< The accumulated particle information for
                                                      ///< all particles in the event.
     G4bool                   fstoreTrajectories;     ///< Whether to store particle trajectories with each particle.
+    std::vector<std::string> fkeepGenTrajectories;   ///< List of generators for which fstoreTrejactories applies.
+                                                     ///  if not provided and storeTrajectories is true, then all
+                                                     ///  trajectories for all generators will be stored. If
+                                                     ///  storeTrajectories is set to false, this list is ignored
+                                                     ///  and all additional trajectory points are not stored.
     std::map<int, int>       fParentIDMap;           ///< key is current track ID, value is parent ID
     static int               fCurrentTrackID;        ///< track ID of the current particle, set to eve ID
                                                      ///< for EM shower particles
     static int               fTrackIDOffset;         ///< offset added to track ids when running over
                                                      ///< multiple MCTruth objects.
     bool                     fKeepEMShowerDaughters; ///< whether to keep EM shower secondaries, tertiaries, etc
+    std::vector<std::string> fNotStoredPhysics;      ///< Physics processes that will not be stored
+    bool                     fkeepOnlyPrimaryFullTraj; ///< Whether to store trajectories only for primaries and
+                                                       ///  their descendants with MCTruth process = "primary"
 
     std::unique_ptr<thePositionInVolumeFilter> fFilter; ///< filter for particles to be kept
 
@@ -160,6 +170,15 @@ namespace larg4 {
 
     /// Map: particle track ID -> index of primary parent in std::vector<simb::MCTruth> object
     std::map<int, size_t> fMCTIndexMap;
+
+    /// Map: particle trakc ID -> boolean decision to keep or not full trajectory points
+    std::map<int,bool> fMCTPrimProcessKeepMap;
+
+    /// Map: MCTruthIndex -> generator, input label of generator and keepGenerator decision
+    std::map<size_t, std::pair<std::string, G4bool>> fMCTIndexToGeneratorMap;
+
+    /// Map: not stored process and counter
+    std::unordered_map<std::string, int> fNotStoredCounterUMap;
 
     // Hold on to the current Art event
     art::Event * currentArtEvent_;

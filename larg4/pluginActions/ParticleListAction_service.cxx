@@ -10,6 +10,8 @@
 #include "lardataobj/Simulation/sim.h"
 #include "nug4/ParticleNavigation/ParticleList.h"
 #include "lardataobj/Simulation/GeneratedParticleInfo.h"
+#include "nusimdata/SimulationBase/MCTruth.h"
+#include "nusimdata/SimulationBase/MCGeneratorInfo.h"
 
 // Framework includes
 #include "art/Framework/Principal/Event.h"
@@ -38,6 +40,8 @@
 
 #include <algorithm>
 #include <fstream> // -- std::ofstream
+#include <string>
+
 // unused const G4bool debug = false;
 
 // Photon variables defined at each step, for use
@@ -69,15 +73,45 @@ namespace larg4 {
       logInfo_("ParticleListActionService"),
       fenergyCut(p.get<double>("EnergyCut",0.0*CLHEP::GeV)),
       fparticleList(0),
-      fstoreTrajectories( p.get<bool>("storeTrajectories",true)),
-      fKeepEMShowerDaughters(p.get<bool>("keepEMShowerDaughters",true))
+      fstoreTrajectories( p.get<bool>("storeTrajectories",true) ),
+      fkeepGenTrajectories( p.get<std::vector<std::string>>("keepGenTrajectories",{})),
+      fKeepEMShowerDaughters( p.get<bool>("keepEMShowerDaughters",true) ),
+      fNotStoredPhysics( p.get< std::vector<std::string> >("NotStoredPhysics",{})),
+      fkeepOnlyPrimaryFullTraj( p.get<bool>("keepOnlyPrimaryFullTrajectories",false) )
   {
 
     // Create the particle list that we'll (re-)use during the course
     // of the Geant4 simulation.
     fparticleList = new sim::ParticleList;
-    fParentIDMap.clear();
-    fMCTIndexMap.clear();
+
+    // -- D.R. If a custom list of not storable physics is provided, use it, otherwise
+    //    use the default list. This preserves the behavior of the keepEmShowerDaughters
+    //    parameter
+    bool customNotStored = not fNotStoredPhysics.empty();
+    if (!fKeepEMShowerDaughters)
+    { // -- Don't keep all processes
+      if( !customNotStored ) // -- Don't keep but haven't provided a list
+      { // -- default list of not stored physics
+        fNotStoredPhysics = {"conv","LowEnConversion","Pair","compt","Compt","Brem","phot","Photo","Ion","annihil"};
+      }
+
+      std::stringstream sstored;
+      sstored << "The full tracking information will not be stored for particles"
+              << " resulting from the following processes: \n{ ";
+      for (auto const & i : fNotStoredPhysics) {
+        sstored << "\"" << i << "\" ";
+        fNotStoredCounterUMap.emplace(i, 0); // -- initialize counter
+      }
+      logInfo_ << sstored.str() << "}\n";
+
+    } else { // -- Keep all processes
+      logInfo_ << "Storing full tracking information for all processes. \n";
+      if (customNotStored) // -- custom list will be ignored
+      {
+        mf::LogWarning("StoredPhysics") << "NotStoredPhysics provided, but will be ignored."
+          << " To use NotStoredPhysics, set keepEMShowerDaughters to false";
+      }
+    }
   }
 
   art::Event  *ParticleListActionService::getCurrArtEvent() { return (currentArtEvent_); }
@@ -98,6 +132,7 @@ namespace larg4 {
     fparticleList->clear();
     fParentIDMap.clear();
     fMCTIndexMap.clear();
+    fMCTPrimProcessKeepMap.clear();
     fCurrentTrackID = sim::NoParticleId;
 
     // -- test of distinguishing event number in cascadeparticles and outgoing particles
@@ -109,7 +144,68 @@ namespace larg4 {
     cascadeFile.open("cascade_particles.tuple", std::ios::out | std::ios::app );
     cascadeFile << "Evt: " << getCurrArtEvent()->id().event() << std::endl;
     cascadeFile.close();
-   }
+
+    // -- D.R. If a custom list of keepGenTrajectories is provided, use it, otherwise
+    //    keep or drop decision made based storeTrajectories parameter. This preserves
+    //    the behavior of the storeTrajectories fhicl param
+    bool customKeepTraj = not fkeepGenTrajectories.empty();
+    if (!fstoreTrajectories){ // -- fstoreTrajectories : false
+      mf::LogDebug("beginOfEventAction::Generator") << "Trajectory points will not be stored.";
+    } else if (!customKeepTraj){ // -- fstoretrajectories : true and empty keepGenTrajectories list
+      mf::LogDebug("beginOfEventAction::Generator") << "keepGenTrajectories list is empty. Will"
+        << " store trajectory points for all generators";
+    }
+
+    // -- D.R. determine mapping between MCTruthIndex(s) and generator(s) for later reference
+    art::ServiceHandle<artg4tk::ActionHolderService> actionHolder;
+    art::Event & evt = actionHolder->getCurrArtEvent();
+    std::vector< art::Handle< std::vector<simb::MCTruth> > > mclists;
+    evt.getManyByType(mclists);
+
+    size_t nKeep = 0;
+    std::string generator_name = "unknown";
+    for (size_t mcti=0; mcti<mclists.size(); mcti++)
+    {
+
+      std::stringstream sskeepgen;
+      sskeepgen << "MCTruth object summary :";
+      sskeepgen << "\n\tPrimary MCTIndex : " << mcti;
+
+      // -- Obtain the generator (provenance) corresponding to the mctruth index:
+      art::Handle<std::vector<simb::MCTruth>> mclistHandle = mclists.at(mcti);
+      generator_name = mclistHandle.provenance()->inputTag().label();
+      sskeepgen << "\n\tProvenance/Generator : " << generator_name;
+
+      G4bool keepGen = false;
+      if (fstoreTrajectories) // -- storeTrajectories set to true; check which
+      {
+        if (!customKeepTraj){ // -- no custom list, so keep all
+          keepGen = true;
+          nKeep++;
+        } else { // -- custom list, so check the ones in the event against provided keep list
+          for(auto keepableGen : fkeepGenTrajectories){
+            if(generator_name == keepableGen){ // -- exit upon finding match; false by default
+              keepGen = true;
+              nKeep++;
+              break;
+            }
+          }
+        }
+      }
+      fMCTIndexToGeneratorMap.emplace(mcti, std::make_pair(generator_name, keepGen));
+      sskeepgen << "\n\tTrajectory points storable : " << (keepGen ? "true" : "false") << "\n";
+      mf::LogDebug("beginOfEventAction::Generator") << sskeepgen.str();
+    }
+
+    if (nKeep == 0 && customKeepTraj && fstoreTrajectories){
+      mf::LogWarning("beginOfEventAction::keepableGenerators") << "storeTrajectories"
+        << " set to true and a non-empty keepGenTrajectories list provided in configuration file, but"
+        << " none of the generators in this list are present in the event! Double check list or don't"
+        << " provide keepGenTrajectories in the configuration to keep all trajectories from all"
+        << " generator labels. This may be expected for generators that have a nonzero probability of"
+        << " producing no particles (e.g. some radiologicals)";
+    }
+  }
 
   //-------------------------------------------------------------
   // figure out the ultimate parentage of the particle with track ID
@@ -124,16 +220,12 @@ namespace larg4 {
     // of the first EM particle that led to this one
     std::map<int,int>::const_iterator itr = fParentIDMap.find(trackid);
     while( itr != fParentIDMap.end() ){
-      mf::LogDebug("ParticleListActionService::GetParentage")
-      << "parentage for " << trackid
-      << " " << (*itr).second;
 
       // set the parentid to the current parent ID, when the loop ends
       // this id will be the first EM particle
       parentid = (*itr).second;
       itr = fParentIDMap.find(parentid);
     }
-    mf::LogDebug("ParticleListActionService::GetParentage") << "final parent ID " << parentid;
 
     return parentid;
   }
@@ -157,6 +249,8 @@ namespace larg4 {
     G4int parentID = track->GetParentID() + fTrackIDOffset;
 
     std::string process_name = "unknown";
+    std::string mct_primary_process = "unknown";
+    bool isFromMCTProcessPrimary = false;
 
     // Is there an MCTruth object associated with this G4Track?  We
     // have to go up a "chain" of information to find out:
@@ -170,11 +264,40 @@ namespace larg4 {
       if ( ppi != 0 ){
         primaryIndex = ppi->MCParticleIndex();
         primarymctIndex = ppi->MCTruthIndex();
-        mf::LogDebug("PrimaryMCTIndex") << "Primary MCTIndex = " << primarymctIndex;
+
+        mct_primary_process = ppi->GetMCParticle()->Process();
+
         // If we've made it this far, a PrimaryParticleInformation
         // object exists and we are using a primary particle, set the
         // process name accordingly
-        process_name = "primary";
+
+        // -- D.R. : if process == "primary" exactly (this will most likely be the case), mark it as
+        //    a primary with keepable trajectory for itself and its descendants.
+        // -- elsif it simply starts with "primary", accept it but mark it as non-keep
+        // -- else force it to be primary because we have determined that it is a primary particle
+        //    This was the original behavior of the code i.e. process was _set_ to "primary"
+        //    regardless of what the process name was in the generator MCTruth object.
+        //
+        // -- NOTE: This enforces a convention for process names assigned in the gen stage.
+        if ( (mct_primary_process.compare("primary") == 0) ) {
+          process_name = "primary";
+          isFromMCTProcessPrimary = true;
+        } else if (mct_primary_process.find("primary") == 0) {
+          process_name = mct_primary_process;
+          isFromMCTProcessPrimary = false;
+          mf::LogDebug("PrimaryParticle") << "MCTruth primary process name contains \"primary\" "
+                                          << " but is not solely \"primary\" : " << process_name
+                                          << ".\nWill not store full set of trajectory points.";
+        } else { // -- override it
+          process_name = "primary";
+          isFromMCTProcessPrimary = true;
+          mf::LogWarning("PrimaryParticle") << "MCTruth primary process does not beging with string"
+                                            << " literal \"primary\" : " << process_name
+                                            << "\nOVERRIDING it to \"primary\"";
+        }
+        // -- The process_name check is simply to allow an additional way to reduce memory usage,
+        //    namely, by creating MCTruth input particles with multiple process labels (e.g. "primary"
+        //    and "primaryBackground") that can be used to veto storage of trajectory points.
 
         // primary particles should have parentID = 0, even if there
         // are multiple MCTruths for this event
@@ -183,47 +306,57 @@ namespace larg4 {
     } // Is there a G4PrimaryParticle?
     // If this is not a primary particle...
     else{
-      // check if this particle was made in an EM shower, don't put it in the particle
-      // list as we don't care about secondaries, tertiaries, etc for these showers
+      // check if this particle was made in an undesirable process. For example:
+      // if one is not interested in EM shower particles, don't put it in the particle
+      // list as one wouldn't care about secondaries, tertiaries, etc. For these showers
       // figure out what process is making this track - skip it if it is
       // one of pair production, compton scattering, photoelectric effect
-      // bremstrahlung, annihilation, any ionization - who wants to save
-      // a buttload of electrons that arent from a CC interaction?
+      // bremstrahlung, annihilation, or ionization
       process_name = track->GetCreatorProcess()->GetProcessName();
-      if( !fKeepEMShowerDaughters
-         && (process_name.find("conv")               != std::string::npos
-             || process_name.find("LowEnConversion") != std::string::npos
-             || process_name.find("Pair")            != std::string::npos
-             || process_name.find("compt")           != std::string::npos
-             || process_name.find("Compt")           != std::string::npos
-             || process_name.find("Brem")            != std::string::npos
-             || process_name.find("phot")            != std::string::npos
-             || process_name.find("Photo")           != std::string::npos
-             || process_name.find("Ion")             != std::string::npos
-             || process_name.find("annihil")         != std::string::npos)
-         ){
+      if( !fKeepEMShowerDaughters )
+      {
+        bool notstore = false;
+        for (auto const& p : fNotStoredPhysics){
+          if (process_name.find(p) != std::string::npos)
+          {
+            notstore = true;
+            mf::LogDebug("NotStoredPhysics") << "Found process : " << process_name;
 
-        // figure out the ultimate parentage of this particle
-        // first add this track id and its parent to the fParentIDMap
-        fParentIDMap[trackID] = parentID;
+            int old = 0;
+            auto search = fNotStoredCounterUMap.find(p);
+            if ( search != fNotStoredCounterUMap.end() ){
+              old = search->second;
+            }
+            fNotStoredCounterUMap.insert_or_assign(p, (old+1) );
 
-        fCurrentTrackID = -1*this->GetParentage(trackID);
+            break;
+          }
+        }
 
-        // check that fCurrentTrackID is in the particle list - it is possible
-        // that this particle's parent is a particle that did not get tracked.
-        // An example is a parent that was made due to muMinusCaptureAtRest
-        // and the daughter was made by the phot process. The parent likely
-        // isn't saved in the particle list because it is below the energy cut
-        // which will put a bogus track id value into the sim::IDE object for
-        // the sim::SimChannel if we don't check it.
-        if(!fparticleList->KnownParticle(fCurrentTrackID))
-          fCurrentTrackID = sim::NoParticleId;
+        if (notstore)
+        {
 
-        // clear current particle as we are not stepping this particle and
-        // adding trajectory points to it
-        fCurrentParticle.clear();
-        return;
+          // figure out the ultimate parentage of this particle
+          // first add this track id and its parent to the fParentIDMap
+          fParentIDMap[trackID] = parentID;
 
+          fCurrentTrackID = -1*this->GetParentage(trackID);
+
+          // check that fCurrentTrackID is in the particle list - it is possible
+          // that this particle's parent is a particle that did not get tracked.
+          // An example is a parent that was made due to muMinusCaptureAtRest
+          // and the daughter was made by the phot process. The parent likely
+          // isn't saved in the particle list because it is below the energy cut
+          // which will put a bogus track id value into the sim::IDE object for
+          // the sim::SimChannel if we don't check it.
+          if(!fparticleList->KnownParticle(fCurrentTrackID))
+            fCurrentTrackID = sim::NoParticleId;
+
+          // clear current particle as we are not stepping this particle and
+          // adding trajectory points to it
+          fCurrentParticle.clear();
+          return;
+        } // end if process matches an undesired process
       } // end if keeping EM shower daughters
 
       // Check the energy of the particle.  If it falls below the energy
@@ -268,6 +401,10 @@ namespace larg4 {
       // Once the parentID is secured, inherit the MCTruth Index
       // which should have been set already
       primarymctIndex = fMCTIndexMap[parentID];
+
+      // Inherit whether the parent is from a primary with MCTruth process_name == "primary"
+      isFromMCTProcessPrimary = fMCTPrimProcessKeepMap[parentID];
+
       // MF_LOG_INFO("SecondaryMCTIndex") << "(trackID, parentID, MCTIndex) = " << trackID
       //                                  << ", " << parentID << ", " << primarymctIndex;
 
@@ -281,9 +418,17 @@ namespace larg4 {
     fCurrentParticle.particle   = new simb::MCParticle( trackID, pdgCode, process_name, parentID, mass);
     fCurrentParticle.truthIndex = primaryIndex;
 
-    fMCTIndexMap[trackID] = primarymctIndex; 
-    mf::LogDebug("MCTIndex") << "(trackID, parentID, MCTIndex) = " << trackID
-                                       << ", " << parentID << ", " << primarymctIndex;
+    fMCTIndexMap[trackID] = primarymctIndex;
+
+    fMCTPrimProcessKeepMap[trackID] = isFromMCTProcessPrimary;
+
+
+    // -- determine whether full set of trajectorie points should be stored or only the start and end points
+    fCurrentParticle.keepFullTrajectory = ( !fstoreTrajectories ) ? false :       /*don't want trajectory points at all, bail*/
+                                          ( !(fMCTIndexToGeneratorMap[primarymctIndex].second) ) ? false : /*particle is not from a storable generator*/
+                                          ( !fkeepOnlyPrimaryFullTraj ) ? true :  /*want all primaries tracked for a storable generator*/
+                                          ( isFromMCTProcessPrimary ) ? true :    /*only descendants from primaries with MCTruth process == "primary"*/
+                                          false ;                                 /*not from MCTruth process "primary"*/
 
     // if we are not filtering, we have a decision already
     if (!fFilter) fCurrentParticle.keep = true;
@@ -294,7 +439,7 @@ namespace larg4 {
                                                          polarization.y(),
                                                          polarization.z() ) );
 
-      // Save the particle in the ParticleList.
+    // Save the particle in the ParticleList.
     fparticleList->Add( fCurrentParticle.particle );
   }
 
@@ -314,8 +459,38 @@ namespace larg4 {
 
     if(aTrack){
       fCurrentParticle.particle->SetWeight(aTrack->GetWeight());
-      G4String process = aTrack->GetStep()->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName();
+
+      // Get the post-step information from the G4Step.
+      const G4StepPoint* postStepPoint = aTrack->GetStep()->GetPostStepPoint();
+
+      G4String process = postStepPoint->GetProcessDefinedStep()->GetProcessName();
       fCurrentParticle.particle->SetEndProcess(process);
+
+
+      // -- D.R. Store the final point only for particles that have not had intermediate trajectory
+      //    points saved. This avoids double counting the final trajectory point for particles from
+      //    generators with storable trajectory points.
+
+      if (!fCurrentParticle.keepFullTrajectory) {
+        const G4ThreeVector position = postStepPoint->GetPosition();
+        G4double time = postStepPoint->GetGlobalTime();
+
+        // Remember that LArSoft uses cm, ns, GeV.
+        TLorentzVector fourPos( position.x() / CLHEP::cm,
+                               position.y() / CLHEP::cm,
+                               position.z() / CLHEP::cm,
+                               time / CLHEP::ns );
+
+        const G4ThreeVector momentum = postStepPoint->GetMomentum();
+        const G4double energy = postStepPoint->GetTotalEnergy();
+        TLorentzVector fourMom( momentum.x() / CLHEP::GeV,
+                               momentum.y() / CLHEP::GeV,
+                               momentum.z() / CLHEP::GeV,
+                               energy / CLHEP::GeV );
+
+        // Add another point in the trajectory.
+        AddPointToCurrentParticle( fourPos, fourMom, std::string(process) );
+      }
     }
 
     // store truth record pointer, only if it is available
@@ -402,7 +577,9 @@ namespace larg4 {
     // and its final position (ie where it has no more energy, or at least < 1 eV) no matter
     // what, but whether we store the rest of the trajectory depends
     // on the process, and on a user switch.
-    if ( fstoreTrajectories  &&  !ignoreProcess ){
+    // -- D.R. Store additional trajectory points only for desired generators and processes
+    if ( !ignoreProcess && fCurrentParticle.keepFullTrajectory ){
+
       // Get the post-step information from the G4Step.
       const G4StepPoint* postStepPoint = step->GetPostStepPoint();
 
@@ -489,7 +666,7 @@ namespace larg4 {
 
     //Only change the fTrackIDOffset if there is in fact a particle to add to the event
     if( (fparticleList->size())!=0){
-      fTrackIDOffset = highestID + 1; 
+      fTrackIDOffset = highestID + 1;
       mf::LogDebug("GetList:fTrackIDOffset") << "highestID = " << highestID
                                      << "\nfTrackIDOffset= " << fTrackIDOffset;
     }
@@ -520,7 +697,7 @@ namespace larg4 {
 
     //Only change the fTrackIDOffset if there is in fact a particle to add to the event
     if( (fparticleList->size())!=0 ){
-      fTrackIDOffset = highestID + 1; 
+      fTrackIDOffset = highestID + 1;
       mf::LogDebug("YieldList:fTrackIDOffset") << "highestID = " << highestID
                                      << "\nfTrackIDOffset= " << fTrackIDOffset;
     }
@@ -547,8 +724,17 @@ namespace larg4 {
 // event and pass the call on to the action objects.
   void ParticleListActionService::endOfEventAction(const G4Event*)
 {
+  // -- End of Run Report
+  if (!fNotStoredCounterUMap.empty()){ // -- Only if there is something to report
+    std::stringstream sscounter;
+    sscounter << "Not Stored Process summary:";
+    for( auto const& [process, count] : fNotStoredCounterUMap ){
+      sscounter << "\n\t" << process << " : " << count;
+    }
+  logInfo_ << sscounter.str();
+  }
+
   partCol_ = std::make_unique<std::vector<simb::MCParticle > >();
-  //tpassn_ = std::make_unique<art::Assns<simb::MCTruth, simb::MCParticle >>();
   tpassn_ = std::make_unique<art::Assns<simb::MCTruth, simb::MCParticle, sim::GeneratedParticleInfo >>();
   // Set up the utility class for the "for_each" algorithm.  (We only
   // need a separate set-up for the utility class because we need to
@@ -580,18 +766,13 @@ namespace larg4 {
       MF_LOG_INFO("endOfEventAction") << "Found " << mct->NParticles() << " particles" ;
 
       unsigned int HowMany=0;
-      //for (auto iPartPair = particleList.begin(); iPartPair != particleList.end(); ++iPartPair) {
       for(auto const& iPartPair: particleList) {
           simb::MCParticle& p = *(iPartPair.second);
           auto gen_index = fMCTIndexMap[ p.TrackId() ];
-          //mf::LogDebug("endOfEventAction") << "PrimaryTruthIndex: " << gen_index;
           if (gen_index == mcl) {
             ++nGeneratedParticles;
             ++HowMany;
 
-            mf::LogDebug("endOfEventAction") << "Provenance = " << mclistHandle.provenance()->inputTag() << "':\n"
-                                            << "TrackID = " << p.TrackId()
-                                            << "\nPrimaryTruthIndex: " << gen_index;
             sim::GeneratedParticleInfo const truthInfo {
               GetPrimaryTruthIndex(p.TrackId())
             };
@@ -600,10 +781,8 @@ namespace larg4 {
               // this means it's primary but with no information; logic error!!
               art::Exception error(art::errors::LogicError);
               error << "Failed to match primary particle:\n";
-              //sim::dump::DumpMCParticle(error, p, "  ");
               error << "\nwith particles from the truth record '"
                 << mclistHandle.provenance()->inputTag() << "':\n";
-              //sim::dump::DumpMCTruth(error, *mct, 2U, "  "); // 2 points per line
               error << "\n";
               throw error;
             }

@@ -1,6 +1,15 @@
-cmake_minimum_required(VERSION 3.7)
+# ======================================================================
+#  larg4 main build file
+#
+#  cd .../path/to/build/directory
+#  source .../path/to/larg4/ups/setup_for_development <-d|-p>
+#  buildtool [-I /install/path] -bt[i] -jN
+# ======================================================================
 
-project(larg4)
+# use cmake 3.14 or later
+cmake_minimum_required (VERSION 3.12...3.14 FATAL_ERROR)
+
+project(larg4 LANGUAGES CXX)
 
 find_package(cetbuildtools REQUIRED)
 
@@ -35,6 +44,7 @@ find_ups_product(lardataobj)
 find_ups_product(messagefacility)
 find_ups_product(nusimdata)
 find_ups_product(nug4)
+find_ups_product(nurandom)
 
 include(ArtDictionary)
 include(ArtMake)
